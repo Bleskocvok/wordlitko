@@ -83,36 +83,6 @@ median [x] = fromIntegral x
 median lst = fromIntegral $ ceiling $ fromIntegral (lst !! (mid - 1) + lst !! mid) / 2
     where
         mid = length lst `div` 2
--- median lst = fromIntegral (prev + lst !! mid) / 2
---     where
---         mid = length lst `div` 2
---         prev | even (length lst) = lst !! (mid - 1)
---              | otherwise = lst !! mid
-
-
--- median :: (Integral a, Fractional b) => [a] -> b
--- median lst = case l of
---         0 -> 0
---         s -> fromIntegral (sum lst) / fromIntegral l
---     where
---         l = length lst
-
-
--- cmpStr :: [String] -> String -> String -> Ordering
--- cmpStr wrds a b
---     | am == bm  = EQ
---     | am < bm   = LT
---     | otherwise = GT
---     where
---         remain ges cho = applyRules (getRules ges cho) wrds
---         simulate wrds ges = remain ges `map` wrds
---         getMean = median . (length `map`)
---         am = getMean $ simulate wrds a
---         bm = getMean $ simulate wrds b
-
-
--- orderBest :: [String] -> [String]
--- orderBest wrds = sortBy (cmpStr wrds) wrds
 
 
 evaluate :: Fractional a => [String] -> String -> a
