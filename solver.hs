@@ -9,12 +9,20 @@ import Control.Monad ( forM_ )
 import Data.Char ( isLetter, toLower )
 import Data.List ( group, sort, sortBy, sortOn )
 import System.Environment ( getArgs )
+import Data.Foldable ( foldr' )
 
 
-data Rule = Green Int Char
+data Rule = Green  Int Char
           | Yellow Int Char
-          | Gray Char
-          deriving ( Show )
+          | Gray   Int Char
+          deriving ( Show, Eq )
+
+
+getC :: Rule -> Char
+getC r = case r of
+    Green  _ c -> c
+    Yellow _ c -> c
+    Gray   _ c -> c
 
 
 solve :: String -> IO ()
@@ -42,7 +50,7 @@ parseRules = parseRules' 0
         parseRules' i (' '      : xs) = parseRules' i xs
         parseRules' i ('\n'     : xs) = parseRules' i xs
         parseRules' i ('\r'     : xs) = parseRules' i xs
-        parseRules' i ('!' : ch : xs) = Gray     (toLower ch) : parseRules' i xs
+        parseRules' i ('!' : ch : xs) = Gray   i (toLower ch) : parseRules' i xs
         parseRules' i ('^' : ch : xs) = Yellow i (toLower ch) : parseRules' i xs
         parseRules' i (ch : xs)       = Green  i (toLower ch) : parseRules' i xs
         parseRules' _ _ = []
@@ -74,7 +82,7 @@ getRules guess chosen = zipWith3 oneChar [0 ..] guess chosen
         oneChar i g c
             | g == c = Green i c
             | g /= c && g `elem` chosen = Yellow i g
-            | otherwise = Gray g
+            | otherwise = Gray i g
 
 
 median :: (Fractional b, Integral a) => [a] -> b
@@ -110,16 +118,40 @@ allWords n = [ ch : xs | ch <- ['a' .. 'z'],
                          xs <- allWords $ n - 1 ]
 
 
+-- applyRules :: [Rule] -> [String] -> [String]
+-- applyRules rls lst = foldr applyRule lst rls
+
+
+-- applyRule :: Rule -> [String] -> [String]
+-- applyRule r =
+--     filter $ case r of
+--         Green i ch -> isAt i ch
+--         Yellow i ch -> \str -> present ch str && not (isAt i ch str)
+--         Gray ch -> not . present ch
+
+
+-- applyRules :: [Rule] -> [String] -> [String]
+-- applyRules rls = filter (apply rls)
+--     where
+--         apply rls str = foldr' (\c acc -> acc && accept rls c str) True rls
+
 applyRules :: [Rule] -> [String] -> [String]
-applyRules rls lst = foldr applyRule lst rls
+applyRules rls lst = foldr' (\r acc -> filter (accept rls r) acc) lst rls
 
 
-applyRule :: Rule -> [String] -> [String]
-applyRule r =
-    filter $ case r of
-        Green i ch -> isAt i ch
-        Yellow i ch -> \str -> present ch str && not (isAt i ch str)
-        Gray ch -> not . present ch
+accept :: [Rule] -> Rule -> String -> Bool
+accept rls r = case r of
+    Green  i ch -> isAt i ch
+    Yellow i ch -> \str -> present ch str && not (isAt i ch str)
+    Gray   i ch ->
+        if elsewhere ch rls
+        then not . isAt i ch
+        else not . present ch
+    where
+        elsewhere ch = not . null . filter ((ch ==) . getC) . filter yellOrGreen
+        yellOrGreen r = case r of Yellow _ _ -> True
+                                  Green  _ _ -> True
+                                  _          -> False
 
 
 present :: Char -> String -> Bool

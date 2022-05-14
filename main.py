@@ -17,6 +17,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 
 
+SOLVER = './solver'
+
+
 class Clue(Enum):
     GRAY   = '⬛'
     YELLOW = '🟨'
@@ -101,9 +104,9 @@ def next_guess(tiles: List[List[Tile]],
             arg += tile[i].char
         arg += '.'
 
-    print(f"./solver.hs {arg}")
+    print(f"{SOLVER} {arg}")
 
-    solve = subprocess.Popen(['./solver.hs', arg], stdout=subprocess.PIPE)
+    solve = subprocess.Popen([f"{SOLVER}", arg], stdout=subprocess.PIPE)
     word =  solve.stdout.readline().decode('utf-8').replace('\n', '')
     solve.kill()
     return word
@@ -147,6 +150,7 @@ def get_clipboard(driver, body):
             # .find_element(By.CSS_SELECTOR, 'div.container div.footer div.share')  \
             # .find_element(By.CSS_SELECTOR, 'button')
     share.click()
+    # to save clipboard contents to a variable
     root = tk.Tk()
     root.withdraw()
     value = root.clipboard_get()
@@ -175,18 +179,6 @@ body.click()
 
 
 tiles = autosolve(driver, body)
-
-# print()
-# for i in range(len(tiles)):
-#     if all_correct(tiles[i]):
-#         print(f"Wordle {i + 1}/6")
-#         break
-# else:
-#     print(f"Wordle X/6")
-
-# for tile in tiles:
-#     show(tile)
-
 
 time.sleep(1.5)
 
