@@ -38,7 +38,8 @@ main :: IO ()
 main = do
     args <- getArgs
     case args of
-        [] -> do rules <- getLine
+        [] -> do putStr "enter clues: "
+                 rules <- getLine
                  solve rules
         (rules : _) -> solve rules
 
@@ -46,14 +47,15 @@ main = do
 parseRules :: String -> [Rule]
 parseRules = parseRules' 0
     where
-        parseRules' i ('.'      : xs) = parseRules' (i + 1) xs
-        parseRules' i (' '      : xs) = parseRules' i xs
-        parseRules' i ('\n'     : xs) = parseRules' i xs
-        parseRules' i ('\r'     : xs) = parseRules' i xs
-        parseRules' i ('!' : ch : xs) = Gray   i (toLower ch) : parseRules' i xs
-        parseRules' i ('^' : ch : xs) = Yellow i (toLower ch) : parseRules' i xs
-        parseRules' i (ch : xs)       = Green  i (toLower ch) : parseRules' i xs
-        parseRules' _ _ = []
+        parseRules' i str = case str of
+            ('.'      : xs) -> parseRules' (i + 1) xs
+            (' '      : xs) -> parseRules' i xs
+            ('\n'     : xs) -> parseRules' i xs
+            ('\r'     : xs) -> parseRules' i xs
+            ('!' : ch : xs) -> Gray   i (toLower ch) : parseRules' i xs
+            ('^' : ch : xs) -> Yellow i (toLower ch) : parseRules' i xs
+            (      ch : xs) -> Green  i (toLower ch) : parseRules' i xs
+            _               -> []
 
 
 parseData :: [String] -> [String]
