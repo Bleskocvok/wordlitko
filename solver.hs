@@ -5,16 +5,21 @@ module Main where
 
 
 import Data.Functor ( (<&>) )
-import Control.Monad ( forM_ )
+import Control.Monad ( forM_, (<$!>) )
 import Data.Char ( isLetter, toLower )
 import Data.List ( group, sort, sortBy, sortOn )
 import System.Environment ( getArgs )
 import Data.Foldable ( foldr' )
 
 
-data Rule = Green  Int Char
-          | Yellow Int Char
-          | Gray   Int Char
+-- CONSTANTS
+dataFile :: String
+dataFile = "data.txt"
+
+
+data Rule = Green  !Int !Char
+          | Yellow !Int !Char
+          | Gray   !Int !Char
           deriving ( Show, Eq )
 
 
@@ -27,7 +32,7 @@ getC r = case r of
 
 solve :: String -> IO ()
 solve input = do
-    words <- parseData <$> getLines "data.txt"
+    words <- parseData <$!> getLines dataFile
     let rules = parseRules input
         filtered = applyRules rules words
         sorted = orderBest filtered
@@ -75,7 +80,7 @@ filterLen l = filter ((l ==) . length)
 
 
 sortUnique :: [String] -> [String]
-sortUnique = map head . group . sort
+sortUnique = (head `map`) . group . sort
 
 
 getRules :: String -> String -> [Rule]
@@ -112,12 +117,6 @@ orderBest wrds = ((fst `map`) . sortOn snd) (zip wrds vals)
 
 -- format:
 -- .A.^N.
-
-
-allWords :: Int -> [String]
-allWords 1 = (: []) <$> ['a' .. 'z']
-allWords n = [ ch : xs | ch <- ['a' .. 'z'],
-                         xs <- allWords $ n - 1 ]
 
 
 applyRules :: [Rule] -> [String] -> [String]
