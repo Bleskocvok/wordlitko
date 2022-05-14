@@ -1,2 +1,6 @@
 
 /chromedriver
+/solver
+/solver.o
+/solver.hi
+
