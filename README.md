@@ -1,0 +1,1 @@
+# samořešítko pro wordle
