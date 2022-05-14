@@ -116,9 +116,13 @@ getRules guess chosen = zipWith3 oneChar [0 ..] (fromWord guess)
 median :: (Fractional b, Integral a) => [a] -> b
 median [] = 1
 median [x] = fromIntegral x
-median lst = fromIntegral $ ceiling $ fromIntegral (lst !! (mid - 1) + lst !! mid) / 2
+-- median lst = fromIntegral $ ceiling $ fromIntegral (lst !! (mid - 1) + lst !! mid) / 2
+median lst = fromIntegral $ ceiling $ fromIntegral (atLift2 (+) (mid - 1) lst) / 2
     where
         mid = length lst `div` 2
+        atLift2 _ _ []           = error "empty list"
+        atLift2 f 0 (x : y : xs) = f x y
+        atLift2 f i (_     : xs) = atLift2 f (i - 1) xs
 
 
 evaluate :: Fractional a => [Word5] -> Word5 -> a
