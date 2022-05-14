@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 
+from dataclasses import dataclass
 from sys import stderr
 from typing import List, Optional
 from enum import Enum
@@ -21,10 +22,10 @@ class Clue(Enum):
     GREEN  = '🟩'
 
 
+@dataclass
 class Tile:
-    def __init__(self, char: str, clue: Clue):
-        self.char = char
-        self.clue = clue
+    char: str
+    clue: Clue
 
 
 def send_word(driver, body, idx: int, word: str) -> Optional[List[Tile]]:
@@ -105,6 +106,31 @@ def next_guess(tiles: List[List[Tile]],
     return word
 
 
+def autosolve(driver, body):
+    tiles: List[List[Tile]] = []
+    i: int = 0
+    while i < 5:
+
+        word: str = next_guess(tiles)
+        ret = send_word(driver, body, i, word)
+
+        if ret is None:
+            i -= 1
+        else:
+            tiles.append(ret)
+
+        show(ret)
+
+        if all_correct(ret):
+            break
+
+        i += 1
+
+    driver.save_screenshot('screen.png')
+    return tiles
+
+
+
 service = Service(executable_path="./chromedriver")
 options = ChromeOptions()
 driver = webdriver.Chrome(service=service, options=options)
@@ -125,27 +151,19 @@ body = driver.find_element(By.TAG_NAME, "body")
 body.click()
 
 
-tiles: List[List[Tile]] = []
-i: int = 0
-while i < 5:
+tiles = autosolve(driver, body)
 
-    word: str = next_guess(tiles)
-    ret = send_word(driver, body, i, word)
-
-    if ret is None:
-        i -= 1
-    else:
-        tiles.append(ret)
-
-    show(ret)
-
-    if all_correct(ret):
+print()
+for i in range(len(tiles)):
+    if all_correct(tiles[i]):
+        print(f"Wordle {i + 1}/6")
         break
+else:
+    print(f"Wordle X/6")
 
-    i += 1
+for tile in tiles:
+    show(tile)
 
-
-driver.save_screenshot('screen.png')
 
 time.sleep(2.4)
 
