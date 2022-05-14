@@ -11,6 +11,9 @@ import Data.List ( group, sort, sortBy, sortOn )
 import System.Environment ( getArgs )
 import Data.Foldable ( foldr' )
 
+-- apparently not in Prelude, therefore not portable necessarily
+import Data.Array ( Array, elems, (!), listArray )
+
 
 -- CONSTANTS
 dataFile :: String
@@ -30,12 +33,29 @@ getC r = case r of
     Gray   _ c -> c
 
 
+-- EFFICIENT DATA TYPE FOR REPRESENTING A 5-LETTER WORD
+type Word5 = Array Int Char
+
+toWord :: String -> Word5
+toWord = listArray (0, 4)
+
+fromWord :: Word5 -> String
+fromWord = elems
+
+present :: Char -> Word5 -> Bool
+present = elem
+
+isAt :: Int -> Char -> Word5 -> Bool
+isAt i ch = (ch ==) . (! i)
+
+
+
 solve :: String -> IO ()
 solve input = do
     words <- parseData <$!> getLines dataFile
     let rules = parseRules input
         filtered = applyRules rules words
-        sorted = orderBest filtered
+        sorted = fromWord <$!> orderBest filtered
     forM_ sorted putStrLn
 
 
@@ -63,8 +83,8 @@ parseRules = parseRules' 0
             _               -> []
 
 
-parseData :: [String] -> [String]
-parseData = sortUnique . map (map toLower) . filterLen 5 . validate
+parseData :: [String] -> [Word5]
+parseData = sortUnique . (toWord <$!>) . map (map toLower) . filterLen 5 . validate
 
 
 getLines :: FilePath -> IO [String]
@@ -79,12 +99,13 @@ filterLen :: Int -> [String] -> [String]
 filterLen l = filter ((l ==) . length)
 
 
-sortUnique :: [String] -> [String]
+sortUnique :: [Word5] -> [Word5]
 sortUnique = (head `map`) . group . sort
 
 
-getRules :: String -> String -> [Rule]
-getRules guess chosen = zipWith3 oneChar [0 ..] guess chosen
+getRules :: Word5 -> Word5 -> [Rule]
+getRules guess chosen = zipWith3 oneChar [0 ..] (fromWord guess)
+                                                (fromWord chosen)
     where
         oneChar i g c
             | g == c = Green i c
@@ -100,7 +121,7 @@ median lst = fromIntegral $ ceiling $ fromIntegral (lst !! (mid - 1) + lst !! mi
         mid = length lst `div` 2
 
 
-evaluate :: Fractional a => [String] -> String -> a
+evaluate :: Fractional a => [Word5] -> Word5 -> a
 evaluate wrds a = am
     where
         remain ges cho = applyRules (getRules ges cho) wrds
@@ -109,7 +130,7 @@ evaluate wrds a = am
         am = getMean $ simulate wrds a
 
 
-orderBest :: [String] -> [String]
+orderBest :: [Word5] -> [Word5]
 orderBest wrds = ((fst `map`) . sortOn snd) (zip wrds vals)
     where
         vals = evaluate wrds `map` wrds
@@ -119,11 +140,11 @@ orderBest wrds = ((fst `map`) . sortOn snd) (zip wrds vals)
 -- .A.^N.
 
 
-applyRules :: [Rule] -> [String] -> [String]
+applyRules :: [Rule] -> [Word5] -> [Word5]
 applyRules rls lst = foldr' (\r acc -> filter (accept rls r) acc) lst rls
 
 
-accept :: [Rule] -> Rule -> String -> Bool
+accept :: [Rule] -> Rule -> Word5 -> Bool
 accept rls r = case r of
     Green  i ch -> isAt i ch
     Yellow i ch -> \str -> present ch str && not (isAt i ch str)
@@ -132,16 +153,8 @@ accept rls r = case r of
         then not . isAt i ch
         else not . present ch
     where
-        elsewhere ch = not . null . filter ((ch ==) . getC) . filter yellOrGreen
+        elsewhere ch = not . null . filter yellOrGreen . filter ((ch ==) . getC)
         yellOrGreen r = case r of Yellow _ _ -> True
                                   Green  _ _ -> True
                                   _          -> False
-
-
-present :: Char -> String -> Bool
-present = elem
-
-
-isAt :: Int -> Char -> String -> Bool
-isAt i ch = (ch ==) . (!! i)
 
