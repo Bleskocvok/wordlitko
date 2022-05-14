@@ -22,7 +22,7 @@ dataFile = "data.txt"
 
 data Rule = Green  !Int !Char
           | Yellow !Int !Char
-          | Gray   !Int !Char
+          | Gray   !Int !Char !Bool
           deriving ( Show, Eq )
 
 
@@ -30,7 +30,8 @@ getC :: Rule -> Char
 getC r = case r of
     Green  _ c -> c
     Yellow _ c -> c
-    Gray   _ c -> c
+    Gray   _ c _ -> c
+
 
 
 -- EFFICIENT DATA TYPE FOR REPRESENTING A 5-LETTER WORD
@@ -69,17 +70,28 @@ main = do
         (rules : _) -> solve rules
 
 
+solveGray :: [Rule] -> [Rule]
+solveGray !rls = solveGray' rls <$!> rls
+    where
+        solveGray' rls r = case r of Gray i ch _ -> Gray i ch (elsewhere ch rls)
+                                     other       -> other
+        elsewhere ch = not . any ((ch ==) . getC) . filter yellOrGreen
+        yellOrGreen r = case r of Yellow _ _ -> True
+                                  Green  _ _ -> True
+                                  _          -> False
+
+
 parseRules :: String -> [Rule]
-parseRules = parseRules' 0
+parseRules = solveGray . parseRules' 0
     where
         parseRules' i str = case str of
             ('.'      : xs) -> parseRules' (i + 1) xs
             (' '      : xs) -> parseRules' i xs
             ('\n'     : xs) -> parseRules' i xs
             ('\r'     : xs) -> parseRules' i xs
-            ('!' : ch : xs) -> Gray   i (toLower ch) : parseRules' i xs
-            ('^' : ch : xs) -> Yellow i (toLower ch) : parseRules' i xs
-            (      ch : xs) -> Green  i (toLower ch) : parseRules' i xs
+            ('!' : ch : xs) -> Gray   i (toLower ch) False : parseRules' i xs
+            ('^' : ch : xs) -> Yellow i (toLower ch)       : parseRules' i xs
+            (      ch : xs) -> Green  i (toLower ch)       : parseRules' i xs
             _               -> []
 
 
@@ -104,13 +116,14 @@ sortUnique = (head `map`) . group . sort
 
 
 getRules :: Word5 -> Word5 -> [Rule]
-getRules guess chosen = zipWith3 oneChar [0 ..] (fromWord guess)
-                                                (fromWord chosen)
+getRules guess chosen = solveGray $ zipWith3 oneChar [0 ..]
+                                                     (fromWord guess)
+                                                     (fromWord chosen)
     where
         oneChar i g c
             | g == c = Green i c
             | g /= c && g `elem` chosen = Yellow i g
-            | otherwise = Gray i g
+            | otherwise = Gray i g False
 
 
 median :: (Fractional b, Integral a) => [a] -> b
@@ -148,13 +161,16 @@ accept :: [Rule] -> Rule -> Word5 -> Bool
 accept rls r = case r of
     Green  i ch -> isAt i ch
     Yellow i ch -> \str -> present ch str && not (isAt i ch str)
-    Gray   i ch ->
-        if elsewhere ch rls
+    Gray   i ch b ->
+        if b
         then not . isAt i ch
         else not . present ch
-    where
-        elsewhere ch = not . null . filter yellOrGreen . filter ((ch ==) . getC)
-        yellOrGreen r = case r of Yellow _ _ -> True
-                                  Green  _ _ -> True
-                                  _          -> False
+    -- where
+    --     elsewhere ch = not . null . filter yellOrGreen . filter ((ch ==) . getC)
+    --     -- elsewhere _ = const True
+    --     -- elsewhere ch = not . any ((ch ==) . getC) . filter yellOrGreen
+    --     -- elsewhere ch  = not . any (\x -> yellOrGreen x && ((ch ==) . getC) x)
+    --     yellOrGreen r = case r of Yellow _ _ -> True
+    --                               Green  _ _ -> True
+    --                               _          -> False
 
