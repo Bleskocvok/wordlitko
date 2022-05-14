@@ -18,7 +18,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 
 
-SOLVER = './solver'
+SOLVER_PATH = './solver'
+DRIVER_PATH = "./chromedriver"
+URL         = "https://www.nytimes.com/games/wordle/index.html"
 
 
 class Clue(Enum):
@@ -105,9 +107,9 @@ def next_guess(tiles: List[List[Tile]],
             arg += tile[i].char
         arg += '.'
 
-    print(f"{SOLVER} {arg}")
+    print(f"{SOLVER_PATH} {arg}")
 
-    solve = subprocess.Popen([f"{SOLVER}", arg], stdout=subprocess.PIPE)
+    solve = subprocess.Popen([f"{SOLVER_PATH}", arg], stdout=subprocess.PIPE)
     nxt = lambda: solve.stdout.readline().decode('utf-8').replace('\n', '')
     word  = nxt()
     while word in banned:
@@ -118,7 +120,7 @@ def next_guess(tiles: List[List[Tile]],
     solve.kill()
 
     if len(word) != 5:
-        solve = subprocess.Popen([f"{SOLVER}", ''], stdout=subprocess.PIPE)
+        solve = subprocess.Popen([f"{SOLVER_PATH}", ''], stdout=subprocess.PIPE)
         words = solve.stdout.readlines()
         word = random.choice(words).decode('utf-8').replace('\n', '')
         solve.kill()
@@ -165,13 +167,11 @@ def get_clipboard(driver, body):
             .find_element(By.CSS_SELECTOR, 'game-stats')  \
             .shadow_root  \
             .find_element(By.CSS_SELECTOR, 'div.container') \
-            .find_element(By.CSS_SELECTOR, 'div.footer') \
+            .find_element(By.CSS_SELECTOR, 'div.footer')  \
             .find_element(By.CSS_SELECTOR, 'div.share')  \
             .find_element(By.CSS_SELECTOR, 'button')
-            # .find_element(By.CSS_SELECTOR, 'div.container div.footer div.share')  \
-            # .find_element(By.CSS_SELECTOR, 'button')
     share.click()
-    # to save clipboard contents to a variable
+    # save clipboard contents to a variable
     root = tk.Tk()
     root.withdraw()
     value = root.clipboard_get()
@@ -179,12 +179,12 @@ def get_clipboard(driver, body):
 
 
 
-service = Service(executable_path="./chromedriver")
+service = Service(executable_path=DRIVER_PATH)
 options = ChromeOptions()
 driver = webdriver.Chrome(service=service, options=options)
 
 
-driver.get("https://www.nytimes.com/games/wordle/index.html")
+driver.get(URL)
 
 print(driver.title)
 
