@@ -7,6 +7,7 @@ from typing import List, Optional
 from enum import Enum
 import subprocess
 import time
+import tkinter as tk
 
 
 from selenium import webdriver
@@ -130,6 +131,26 @@ def autosolve(driver, body):
     return tiles
 
 
+def get_clipboard(driver, body):
+    share = driver  \
+            .find_element(By.XPATH, '/html/body/game-app')  \
+            .shadow_root  \
+            .find_element(By.CSS_SELECTOR, 'game-theme-manager div#game game-modal')  \
+            .find_element(By.CSS_SELECTOR, 'game-stats')  \
+            .shadow_root  \
+            .find_element(By.CSS_SELECTOR, 'div.container') \
+            .find_element(By.CSS_SELECTOR, 'div.footer') \
+            .find_element(By.CSS_SELECTOR, 'div.share')  \
+            .find_element(By.CSS_SELECTOR, 'button')
+            # .find_element(By.CSS_SELECTOR, 'div.container div.footer div.share')  \
+            # .find_element(By.CSS_SELECTOR, 'button')
+    share.click()
+    root = tk.Tk()
+    root.withdraw()
+    value = root.clipboard_get()
+    return value
+
+
 
 service = Service(executable_path="./chromedriver")
 options = ChromeOptions()
@@ -153,19 +174,21 @@ body.click()
 
 tiles = autosolve(driver, body)
 
-print()
-for i in range(len(tiles)):
-    if all_correct(tiles[i]):
-        print(f"Wordle {i + 1}/6")
-        break
-else:
-    print(f"Wordle X/6")
+# print()
+# for i in range(len(tiles)):
+#     if all_correct(tiles[i]):
+#         print(f"Wordle {i + 1}/6")
+#         break
+# else:
+#     print(f"Wordle X/6")
 
-for tile in tiles:
-    show(tile)
+# for tile in tiles:
+#     show(tile)
 
 
-time.sleep(2.4)
+time.sleep(1.5)
+
+print(get_clipboard(driver, body))
 
 
 driver.quit()
