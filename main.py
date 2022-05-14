@@ -8,6 +8,7 @@ from enum import Enum
 import subprocess
 import time
 import tkinter as tk
+import random
 
 
 from selenium import webdriver
@@ -107,25 +108,45 @@ def next_guess(tiles: List[List[Tile]],
     print(f"{SOLVER} {arg}")
 
     solve = subprocess.Popen([f"{SOLVER}", arg], stdout=subprocess.PIPE)
-    word =  solve.stdout.readline().decode('utf-8').replace('\n', '')
+    nxt = lambda: solve.stdout.readline().decode('utf-8').replace('\n', '')
+    word  = nxt()
+    while word in banned:
+        if solve.stdout:
+            word = nxt()
+        else:
+            word = ''
     solve.kill()
+
+    if len(word) != 5:
+        solve = subprocess.Popen([f"{SOLVER}", ''], stdout=subprocess.PIPE)
+        words = solve.stdout.readlines()
+        word = random.choice(words).decode('utf-8').replace('\n', '')
+        solve.kill()
+
     return word
 
 
 def autosolve(driver, body):
     tiles: List[List[Tile]] = []
+    banned: List[str] = []
     i: int = 0
-    while i < 5:
+    while i < 6:
 
-        word: str = next_guess(tiles)
+        word: str = next_guess(tiles, banned)
         ret = send_word(driver, body, i, word)
 
         if ret is None:
-            i -= 1
-        else:
-            tiles.append(ret)
+            banned.append(word)
+            body.send_keys(Keys.BACKSPACE)
+            body.send_keys(Keys.BACKSPACE)
+            body.send_keys(Keys.BACKSPACE)
+            body.send_keys(Keys.BACKSPACE)
+            body.send_keys(Keys.BACKSPACE)
+            continue
 
         # show(ret)
+
+        tiles.append(ret)
 
         if all_correct(ret):
             break
