@@ -101,6 +101,8 @@ def next_guess(tiles: List[List[Tile]],
             arg += tile[i].char
         arg += '.'
 
+    print(f"./solver.hs {arg}")
+
     solve = subprocess.Popen(['./solver.hs', arg], stdout=subprocess.PIPE)
     word =  solve.stdout.readline().decode('utf-8').replace('\n', '')
     solve.kill()
@@ -120,7 +122,7 @@ def autosolve(driver, body):
         else:
             tiles.append(ret)
 
-        show(ret)
+        # show(ret)
 
         if all_correct(ret):
             break
@@ -188,6 +190,7 @@ tiles = autosolve(driver, body)
 
 time.sleep(1.5)
 
+print()
 print(get_clipboard(driver, body))
 
 
