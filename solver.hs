@@ -118,23 +118,6 @@ allWords n = [ ch : xs | ch <- ['a' .. 'z'],
                          xs <- allWords $ n - 1 ]
 
 
--- applyRules :: [Rule] -> [String] -> [String]
--- applyRules rls lst = foldr applyRule lst rls
-
-
--- applyRule :: Rule -> [String] -> [String]
--- applyRule r =
---     filter $ case r of
---         Green i ch -> isAt i ch
---         Yellow i ch -> \str -> present ch str && not (isAt i ch str)
---         Gray ch -> not . present ch
-
-
--- applyRules :: [Rule] -> [String] -> [String]
--- applyRules rls = filter (apply rls)
---     where
---         apply rls str = foldr' (\c acc -> acc && accept rls c str) True rls
-
 applyRules :: [Rule] -> [String] -> [String]
 applyRules rls lst = foldr' (\r acc -> filter (accept rls r) acc) lst rls
 
