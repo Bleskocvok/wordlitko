@@ -1,8 +1,10 @@
 
-/chromedriver
+/chromedriver*
 /solver
 /solver.o
 /solver.hi
+
+/*.exe
 
 /czech.txt
 /ordered.txt
