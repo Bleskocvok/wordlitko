@@ -110,7 +110,8 @@ def next_guess(tiles: List[List[Tile]],
     print(f"{SOLVER_PATH} {arg}")
 
     solve = subprocess.Popen([f"{SOLVER_PATH}", arg], stdout=subprocess.PIPE)
-    nxt = lambda: solve.stdout.readline().decode('utf-8').replace('\n', '')
+    decode = lambda s: s.decode('utf-8').replace('\n', '').replace('\r', '')
+    nxt = lambda: decode(solve.stdout.readline())
     word  = nxt()
     while word in banned:
         if solve.stdout:
@@ -122,7 +123,7 @@ def next_guess(tiles: List[List[Tile]],
     if len(word) != 5:
         solve = subprocess.Popen([f"{SOLVER_PATH}", ''], stdout=subprocess.PIPE)
         words = solve.stdout.readlines()
-        word = random.choice(words).decode('utf-8').replace('\n', '')
+        word = decode(random.choice(words))
         solve.kill()
 
     return word
