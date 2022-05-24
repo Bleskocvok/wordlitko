@@ -9,7 +9,7 @@ import subprocess
 import time
 import tkinter as tk
 import random
-
+import sys
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -18,9 +18,13 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 
 
-SOLVER_PATH = './solver'
-DRIVER_PATH = "./chromedriver"
-URL         = "https://www.nytimes.com/games/wordle/index.html"
+# SOLVER_PATH = './solver'
+# DRIVER_PATH = "./chromedriver"
+# URL         = "https://www.nytimes.com/games/wordle/index.html"
+DRIVER_PATH   = sys.argv[1]
+SOLVER_PATH   = sys.argv[2]
+URL           = "https://www.nytimes.com/games/wordle/index.html"
+
 
 
 class Clue(Enum):
