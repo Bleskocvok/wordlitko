@@ -1,13 +1,23 @@
 
+# driver
 /chromedriver*
+
+# binaries
 /solver
 /solver.o
 /solver.hi
-
 /*.exe
 
-/czech.txt
-/ordered.txt
-/syscordle.txt
-/usr_share_dict_words.txt
+# testing word databases
+/data/czech.txt
+/data/possible.txt
+/data/wiki_list.txt
+/data/ordered.txt
+/data/syscordle.txt
+/data/usr_share_dict_words.txt
+
+# screenshot
 /screen.png
+
+# ide
+/.vscode/
