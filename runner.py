@@ -6,44 +6,57 @@ from typing import List, Optional
 from rules import Board, to_argument
 
 
-SOLVER_PATH = None
+
+class Runner:
+
+    def __init__(self, solver_path: str):
+        self.solver_path = solver_path
 
 
-def set_solver_path(path: str) -> None:
-    global SOLVER_PATH
-    SOLVER_PATH = path
+    def get_cli_command(self, tiles: Board) -> str:
+        arg: str = to_argument(tiles)
+        return f'{self.solver_path} {arg}'
 
 
-def next_guess(tiles: Board,
-               banned: Optional[List[str]] = None) -> str:
-    if banned is None:
-        banned = []
+    def popen(self, arg: str) -> subprocess.Popen:
+        return subprocess.Popen([f"{self.solver_path}", arg],
+                                  stdout=subprocess.PIPE)
 
-    arg: str = to_argument(tiles)
 
-    print(f"{SOLVER_PATH} {arg}")
+    def read_all_lines(self) -> List[str]:
+        solver = self.popen('')
+        words = solver.stdout.readlines()
+        solver.kill()
+        return words
 
-    solve = subprocess.Popen([f"{SOLVER_PATH}", arg], stdout=subprocess.PIPE)
 
-    decode = lambda s: s.decode('utf-8')    \
-                        .replace('\n', '')  \
-                        .replace('\r', '')  # cause of CRLF
+    def next_guess(self,
+                tiles: Board,
+                banned: Optional[List[str]] = None) -> str:
 
-    nxt = lambda: decode(solve.stdout.readline())
+        if banned is None:
+            banned = []
 
-    word  = nxt()
-    while word in banned:
-        if solve.stdout:
-            word = nxt()
-        else:
-            word = ''
-    solve.kill()
+        arg: str = to_argument(tiles)
 
-    if len(word) != 5:
-        solve = subprocess.Popen([f"{SOLVER_PATH}", ''], stdout=subprocess.PIPE)
-        words = solve.stdout.readlines()
-        word = decode(random.choice(words))
-        solve.kill()
+        solver = self.popen(arg)
 
-    return word
+        decode = lambda s: s.decode('utf-8')    \
+                            .replace('\n', '')  \
+                            .replace('\r', '')  # cause of CRLF
+
+        nxt = lambda: decode(solver.stdout.readline())
+
+        word = nxt()
+        while word in banned:
+            if solver.stdout:
+                word = nxt()
+            else:
+                word = ''
+        solver.kill()
+
+        if len(word) != 5:
+            word = decode(self.read_all_lines())
+
+        return word
 

@@ -14,7 +14,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 
 from rules import Tile, Board, all_correct
-from runner import next_guess, set_solver_path
+from runner import Runner
 from web import WebInteract
 
 
@@ -26,7 +26,7 @@ def get_date() -> str:
     return now.strftime('%F')  # ISO 8601 date format
 
 
-def autosolve(weber: WebInteract) -> Board:
+def autosolve(weber: WebInteract, runner: Runner) -> Board:
 
     tiles: Board = []
     banned: List[str] = []
@@ -34,7 +34,9 @@ def autosolve(weber: WebInteract) -> Board:
     i: int = 0
     while i < 6:
 
-        word: str = next_guess(tiles, banned)
+        print(f'{runner.get_cli_command(tiles)}')
+
+        word: str = runner.next_guess(tiles, banned)
         ret = weber.send_word(i, word)
 
         if ret is None:
@@ -65,16 +67,16 @@ def main() -> int:
     SOLVER_PATH   = sys.argv[2]
     URL           = "https://www.nytimes.com/games/wordle/index.html"
 
-    set_solver_path(SOLVER_PATH)
-
     # “Weber” is a german name, apparently
     weber = WebInteract(URL, DRIVER_PATH)
+
+    runner = Runner(SOLVER_PATH)
 
     print(weber.get_title())
 
     weber.close_overlays()
 
-    tiles = autosolve(weber)
+    tiles = autosolve(weber, runner)
 
     time.sleep(1.5)
 
