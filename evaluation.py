@@ -92,18 +92,22 @@ def main() -> int:
 
     stats = Stats()
 
-    print('...\n' * 10)
+    print('...\n' * 16)
 
     for i, word in enumerate(answers):
         tries, tiles = solve(word, sim, runner)
         stats.record(tries)
 
-        print('\033[12A')
+        print('\033[18A')
         print(f'ROUND: {i + 1} / {len(answers)}')
-        print(f'WORD:  {word}')
 
-        # print('LAST:')
-        # show(tiles)
+        print(f'WORD:  {word}')
+        for row in range(6):
+            print('\033[K', end='')
+            if row < len(tiles):
+                for elem in tiles[row]:
+                    print(f'{elem.clue.value}', end='')
+            print(' ')
 
         print(f'STATS:')
         print(stats)
