@@ -3,9 +3,7 @@
 
 from sys import stderr
 from typing import List, Optional, Tuple
-import time
 import sys
-import datetime
 
 from rules import Simulator, Tile, Board, all_correct, show
 from runner import Runner
@@ -99,7 +97,6 @@ def main() -> int:
         stats.record(tries)
 
         print('\033[18A')
-        print(f'ROUND: {i + 1} / {len(answers)}')
 
         print(f'WORD:  {word}')
         for row in range(6):
@@ -108,6 +105,8 @@ def main() -> int:
                 for elem in tiles[row]:
                     print(f'{elem.clue.value}', end='')
             print(' ')
+
+        print(f'ROUND: {i + 1} / {len(answers)}')
 
         print(f'STATS:')
         print(stats)
