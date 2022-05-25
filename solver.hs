@@ -109,14 +109,17 @@ getRules guess chosen = zipWith3 oneChar [0 ..] (fromWord guess)
     where
         oneChar i g c
             | g == c = Green i c
-            | g /= c && g `elem` chosen = Yellow i g
+            | g `present` chosen = Yellow i g
             | otherwise = Gray i g
+
+        -- TODO: account for repeated letters in chosen
+        -- counts = (\c -> (c, length $ filter (c ==) lst)) `map` lst
+        --     where lst = fromWord chosen
 
 
 median :: (Fractional b, Integral a) => [a] -> b
 median [] = 1
 median [x] = fromIntegral x
--- median lst = fromIntegral $ ceiling $ fromIntegral (lst !! (mid - 1) + lst !! mid) / 2
 median lst = fromIntegral $ ceiling $ fromIntegral (atLift2 (+) (mid - 1) lst) / 2
     where
         mid = length lst `div` 2
@@ -126,12 +129,12 @@ median lst = fromIntegral $ ceiling $ fromIntegral (atLift2 (+) (mid - 1) lst) /
 
 
 evaluate :: Fractional a => [Word5] -> Word5 -> a
-evaluate wrds a = am
+evaluate wrds a = mean
     where
         remain ges cho = applyRules (getRules ges cho) wrds
         simulate wrds ges = remain ges `map` wrds
         getMean = median . (length `map`)
-        am = getMean $ simulate wrds a
+        mean = getMean $ simulate wrds a
 
 
 orderBest :: [Word5] -> [Word5]
