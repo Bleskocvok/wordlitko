@@ -10,7 +10,6 @@
 
 # testing word databases
 /data/czech.txt
-/data/possible.txt
 /data/wiki_list.txt
 /data/ordered.txt
 /data/syscordle.txt
