@@ -20,10 +20,10 @@ def solve(word: str, sim: Simulator, runner: Runner) -> Tuple[int, Board]:
     i: int = 0
     while i < 6:
 
-        # print(f'{runner.get_cli_command(tiles)}')
-
         guess: str = runner.next_guess(tiles, banned)
 
+        # # no verbose logs for now
+        # print(f'{runner.get_cli_command(tiles)}')
         # print(f'guess: {guess}')
 
         ret: Optional[List[Tile]] = sim.guess(guess)
