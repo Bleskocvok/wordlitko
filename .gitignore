@@ -16,8 +16,8 @@
 /data/syscordle.txt
 /data/usr_share_dict_words.txt
 
-# screenshot
-/screen.png
+# trophy room
+/screenshots
 
 # ide
 /.vscode/

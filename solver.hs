@@ -12,7 +12,7 @@ import System.Environment ( getArgs )
 import Data.Foldable ( foldr' )
 
 -- apparently not in Prelude, therefore not portable necessarily
-import Data.Array ( Array, elems, (!), listArray )
+import Data.Array as A ( Array, elems, (!), listArray )
 
 
 -- CONSTANTS
@@ -37,16 +37,16 @@ getC r = case r of
 type Word5 = Array Int Char
 
 toWord :: String -> Word5
-toWord = listArray (0, 4)
+toWord = A.listArray (0, 4)
 
 fromWord :: Word5 -> String
-fromWord = elems
+fromWord = A.elems
 
 present :: Char -> Word5 -> Bool
 present = elem
 
 isAt :: Int -> Char -> Word5 -> Bool
-isAt i ch = (ch ==) . (! i)
+isAt i ch = (ch ==) . (A.! i)
 
 
 
