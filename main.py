@@ -18,14 +18,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 
 
-# SOLVER_PATH = './solver'
-# DRIVER_PATH = "./chromedriver"
-# URL         = "https://www.nytimes.com/games/wordle/index.html"
-DRIVER_PATH   = sys.argv[1]
-SOLVER_PATH   = sys.argv[2]
-URL           = "https://www.nytimes.com/games/wordle/index.html"
-
-
 
 class Clue(Enum):
     GRAY   = '⬛'
@@ -48,7 +40,11 @@ def send_word(driver, body, idx: int, word: str) -> Optional[List[Tile]]:
 
     tiles = driver.find_element(By.XPATH, '/html/body/game-app')  \
                   .shadow_root  \
-                  .find_elements(By.CSS_SELECTOR, 'game-theme-manager div div div game-row')[idx]  \
+                  .find_elements(By.CSS_SELECTOR,'game-theme-manager '
+                                                + 'div '
+                                                + 'div '
+                                                + 'div '
+                                                + 'game-row')[idx]  \
                   .shadow_root  \
                   .find_element(By.CSS_SELECTOR, 'div')  \
                   .find_elements(By.CSS_SELECTOR, 'game-tile')
@@ -183,34 +179,58 @@ def get_clipboard(driver, body):
     return value
 
 
-
-service = Service(executable_path=DRIVER_PATH)
-options = ChromeOptions()
-driver = webdriver.Chrome(service=service, options=options)
-
-
-driver.get(URL)
-
-print(driver.title)
-
-# accept cockies
-cock = driver.find_element(By.XPATH, '//*[@id="pz-gdpr-btn-accept"]')
-cock.click()
-
-driver.implicitly_wait(0.5)
-
-body = driver.find_element(By.TAG_NAME, "body")
-# close help overlay
-body.click()
+DRIVER_PATH = None
+SOLVER_PATH = None
+URL = None
 
 
-tiles = autosolve(driver, body)
+def main() -> int:
 
-time.sleep(1.5)
+    if len(sys.argv) < 3:
+        print(f'usage: {sys.argv[0]} DRIVER_PATH SOLVER_PATH', file=stderr)
+        return 1
 
-print()
-print(get_clipboard(driver, body))
+    global DRIVER_PATH
+    global SOLVER_PATH
+    global URL
+    DRIVER_PATH   = sys.argv[1]
+    SOLVER_PATH   = sys.argv[2]
+    URL           = "https://www.nytimes.com/games/wordle/index.html"
+
+    service = Service(executable_path=DRIVER_PATH)
+    options = ChromeOptions()
+    driver = webdriver.Chrome(service=service, options=options)
 
 
-driver.quit()
+    driver.get(URL)
+
+    print(driver.title)
+
+    # accept cookies
+    cock = driver.find_element(By.XPATH, '//*[@id="pz-gdpr-btn-accept"]')
+    cock.click()
+
+    driver.implicitly_wait(0.5)
+
+    body = driver.find_element(By.TAG_NAME, "body")
+    # close help overlay
+    body.click()
+
+
+    tiles = autosolve(driver, body)
+
+    time.sleep(1.5)
+
+    print()
+    print(get_clipboard(driver, body))
+
+    driver.quit()
+
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+
 
