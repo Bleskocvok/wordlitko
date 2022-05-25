@@ -21,3 +21,7 @@
 
 # ide
 /.vscode/
+
+# caches
+/__pycache__/
+/.mypy_cache/
