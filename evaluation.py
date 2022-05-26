@@ -81,7 +81,7 @@ def main() -> int:
     WORDS_PATH = sys.argv[2]
     SOLVER_PATH = sys.argv[3]
 
-    runner = Runner(SOLVER_PATH)
+    runner = Runner(SOLVER_PATH, WORDS_PATH)
 
     answers = get_file(ANSWERS_PATH)
     possible = get_file(WORDS_PATH)

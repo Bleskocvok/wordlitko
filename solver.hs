@@ -10,14 +10,11 @@ import Data.Char ( isLetter, toLower )
 import Data.List ( group, sort, sortBy, sortOn )
 import System.Environment ( getArgs )
 import Data.Foldable ( foldr' )
+import System.Exit
+import System.Environment
 
 -- apparently not in Prelude, therefore not portable necessarily
 import Data.Array as A ( Array, elems, (!), listArray )
-
-
--- CONSTANTS
-dataFile :: String
-dataFile = "data.txt"
 
 
 data Rule = Green  !Int !Char
@@ -49,24 +46,23 @@ isAt :: Int -> Char -> Word5 -> Bool
 isAt i ch = (ch ==) . (A.! i)
 
 
-
-solve :: String -> IO ()
-solve input = do
-    words <- parseData <$!> getLines dataFile
-    let rules = parseRules input
-        filtered = applyRules rules words
-        sorted = fromWord <$!> orderBest filtered
-    forM_ sorted putStrLn
-
-
 main :: IO ()
 main = do
     args <- getArgs
     case args of
-        [] -> do putStr "enter clues: "
-                 rules <- getLine
-                 solve rules
-        (rules : _) -> solve rules
+        (rules : dataFile : _) -> solve rules dataFile
+        _ -> do prog <- getProgName
+                putStrLn $ "usage: " ++ prog ++ " CLUES DATABASE_PATH"
+                exitFailure
+
+
+solve :: String -> String -> IO ()
+solve input database = do
+    words <- parseData <$!> getLines database
+    let rules = parseRules input
+        filtered = applyRules rules words
+        sorted = fromWord <$!> orderBest filtered
+    forM_ sorted putStrLn
 
 
 parseRules :: String -> [Rule]

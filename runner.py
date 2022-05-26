@@ -9,9 +9,10 @@ from rules import Board, to_argument
 
 class Runner:
 
-    def __init__(self, solver_path: str):
+    def __init__(self, solver_path: str, data_path: str):
 
         self.solver_path = solver_path
+        self.data_path = data_path
 
         # temporary workaround to make repeated execution much faster
         self.cache: Optional[List[str]] = None
@@ -23,7 +24,7 @@ class Runner:
 
 
     def popen(self, arg: str = '') -> subprocess.Popen:
-        return subprocess.Popen([self.solver_path, arg],
+        return subprocess.Popen([self.solver_path, arg, self.data_path],
                                  stdout=subprocess.PIPE)
 
 

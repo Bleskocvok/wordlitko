@@ -53,18 +53,19 @@ def autosolve(weber: WebInteract, runner: Runner) -> Board:
 
 def main() -> int:
 
-    if len(sys.argv) < 3:
-        print(f'usage: {sys.argv[0]} DRIVER_PATH SOLVER_PATH', file=stderr)
+    if len(sys.argv) < 4:
+        print(f'usage: {sys.argv[0]} DRIVER_PATH SOLVER_PATH DATABASE_PATH', file=stderr)
         return 1
 
     DRIVER_PATH   = sys.argv[1]
     SOLVER_PATH   = sys.argv[2]
+    DATABASE_PATH = sys.argv[3]
     URL           = "https://www.nytimes.com/games/wordle/index.html"
 
     # “Weber” is a german name, apparently
     weber = WebInteract(URL, DRIVER_PATH)
 
-    runner = Runner(SOLVER_PATH)
+    runner = Runner(SOLVER_PATH, DATABASE_PATH)
 
     print(weber.get_title())
 

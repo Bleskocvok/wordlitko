@@ -33,7 +33,7 @@ $(SOLVER): $(SOLVER_SRC)
 	$(GHC) -O2 -o $@ $^
 
 run: $(SOLVER)
-	$(PYTHON) $(APP_SRC) "$(DRIVER)" "$(SOLVER)"
+	$(PYTHON) $(APP_SRC) "$(DRIVER)" "$(SOLVER)" "data.txt"
 
 evaluate: $(SOLVER)
 	$(PYTHON) $(EVAL_SRC) "data/answers.txt" "data/possible.txt" "$(SOLVER)"
