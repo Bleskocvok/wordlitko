@@ -1,5 +1,6 @@
 
 APP_SRC = main.py
+EVAL_SRC = evaluation.py
 SOLVER_SRC = solver.hs
 SOLVER_GARBAGE = solver.hi solver.o
 
@@ -34,10 +35,13 @@ $(SOLVER): $(SOLVER_SRC)
 run: $(SOLVER)
 	$(PYTHON) $(APP_SRC) "$(DRIVER)" "$(SOLVER)"
 
+evaluate: $(SOLVER)
+	$(PYTHON) $(EVAL_SRC) "data/answers.txt" "data/possible.txt" "$(SOLVER)"
+
 clean:
 	$(RM) $(SOLVER_GARBAGE)
 
 distclean: clean
 	$(RM) $(SOLVER)
 
-.PHONY: all clean distclean run
+.PHONY: all clean distclean run evaluate
