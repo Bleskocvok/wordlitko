@@ -1,8 +1,14 @@
 
+HSFLAGS ?= -O2
+
 APP_SRC = main.py
 EVAL_SRC = evaluation.py
 SOLVER_SRC = solver.hs
 SOLVER_GARBAGE = solver.hi solver.o
+
+ANSWERS = data/answers.txt
+WORDS = data/possible.txt
+DATA = $(WORDS)
 
 
 ifeq ($(OS),Windows_NT)
@@ -30,13 +36,18 @@ endif
 all: $(SOLVER)
 
 $(SOLVER): $(SOLVER_SRC)
-	$(GHC) -O2 -o $@ $^
+	$(GHC) $(HSFLAGS) -o $@ $^
+
+
+time: $(SOLVER)
+	time -p $(SOLVER) '' "$(DATA)" | tail -n5
 
 run: $(SOLVER)
-	$(PYTHON) $(APP_SRC) "$(DRIVER)" "$(SOLVER)" "data.txt"
+	$(PYTHON) $(APP_SRC) "$(DRIVER)" "$(SOLVER)" "$(DATA)"
 
 evaluate: $(SOLVER)
-	$(PYTHON) $(EVAL_SRC) "data/answers.txt" "data/possible.txt" "$(SOLVER)"
+	time -p $(PYTHON) $(EVAL_SRC) "$(ANSWERS)" "$(WORDS)" "$(SOLVER)"
+
 
 clean:
 	$(RM) $(SOLVER_GARBAGE)
@@ -44,4 +55,5 @@ clean:
 distclean: clean
 	$(RM) $(SOLVER)
 
-.PHONY: all clean distclean run evaluate
+
+.PHONY: all clean distclean run evaluate time
