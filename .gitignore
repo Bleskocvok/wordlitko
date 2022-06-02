@@ -15,6 +15,9 @@
 /data/syscordle.txt
 /data/usr_share_dict_words.txt
 
+# profiling
+/solver.hp
+
 # trophy room
 /screenshots
 
