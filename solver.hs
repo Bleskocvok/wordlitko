@@ -13,7 +13,7 @@ import Data.Foldable ( foldr' )
 import System.Exit
 import System.Environment
 
--- apparently not in Prelude, therefore not portable necessarily
+-- apparently not in `base`, therefore not portable necessarily
 import Data.Array as A ( Array, elems, (!), listArray )
 
 
