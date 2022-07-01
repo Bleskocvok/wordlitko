@@ -24,6 +24,9 @@ Board = List[List[Tile]]
 
 
 
+WORD_LENGTH: int = 5
+
+
 class Simulator:
 
     def __init__(self, allowed: List[str], word: Optional[str] = None):

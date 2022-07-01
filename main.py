@@ -79,7 +79,11 @@ def main() -> int:
 
     weber.close_overlays()
 
-    tiles = autosolve(weber, runner)
+    try:
+        tiles = autosolve(weber, runner)
+    except Exception as e:
+        print(f'ERROR: {e}')
+        return 1
 
     time.sleep(1.5)
 

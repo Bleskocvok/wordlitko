@@ -9,8 +9,7 @@ from typing import List, Optional
 import tkinter as tk
 import time
 
-from rules import Clue, Tile
-
+from rules import Clue, Tile, WORD_LENGTH
 
 
 class WebInteract:
@@ -38,7 +37,8 @@ class WebInteract:
     def close_overlays(self) -> None:
 
         # accept cookies
-        cock = self.driver.find_element(By.XPATH, '//*[@id="pz-gdpr-btn-accept"]')
+        cock = self.driver  \
+               .find_element(By.XPATH, '//*[@id="pz-gdpr-btn-accept"]')
         cock.click()
 
         self.driver.implicitly_wait(0.5)
@@ -53,16 +53,9 @@ class WebInteract:
 
 
     def get_score(self) -> str:
+    
         share = self.driver  \
-                .find_element(By.XPATH, '/html/body/game-app')  \
-                .shadow_root  \
-                .find_element(By.CSS_SELECTOR, 'game-theme-manager div#game game-modal')  \
-                .find_element(By.CSS_SELECTOR, 'game-stats')  \
-                .shadow_root  \
-                .find_element(By.CSS_SELECTOR, 'div.container') \
-                .find_element(By.CSS_SELECTOR, 'div.footer')  \
-                .find_element(By.CSS_SELECTOR, 'div.share')  \
-                .find_element(By.CSS_SELECTOR, 'button')
+                .find_element(By.XPATH, '//*[@id="share-button"]')
         share.click()
 
         # save clipboard contents to a variable
@@ -84,22 +77,18 @@ class WebInteract:
 
         time.sleep(2.4)
 
-        tiles = self.driver.find_element(By.XPATH, '/html/body/game-app')  \
-                    .shadow_root  \
-                    .find_elements(By.CSS_SELECTOR,'game-theme-manager '
-                                                    + 'div '
-                                                    + 'div '
-                                                    + 'div '
-                                                    + 'game-row')[idx]  \
-                    .shadow_root  \
-                    .find_element(By.CSS_SELECTOR, 'div')  \
-                    .find_elements(By.CSS_SELECTOR, 'game-tile')
+        tiles = self.driver  \
+                .find_element(By.XPATH, f'/html/body/div/div[1]/div/div[{idx + 1}]')
+
+        if not tiles:
+            raise RuntimeError('Tile cells elements not found')
 
         res: List[Tile] = []
 
-        for tile in tiles:
-            letter = tile.get_attribute('letter')
-            value  = tile.get_attribute('evaluation')
+        for i in range(WORD_LENGTH):
+            cell   = tiles.find_element(By.XPATH, f'div[{i + 1}]/div')
+            value  = cell.get_attribute('data-state')
+            letter = cell.text
 
             if value is None:           return None
             elif value == 'absent':     res.append(Tile(letter, Clue.GRAY))
