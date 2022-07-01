@@ -9,13 +9,16 @@ from rules import Board, to_argument
 
 class Runner:
 
-    def __init__(self, solver_path: str, data_path: str):
+    def __init__(self,
+                 solver_path: str,
+                 data_path: str,
+                 cache: Optional[List[str]] = None):
 
         self.solver_path = solver_path
         self.data_path = data_path
 
         # temporary workaround to make repeated execution much faster
-        self.cache: Optional[List[str]] = None
+        self.cache = cache
 
 
     def get_cli_command(self, tiles: Board) -> str:
@@ -39,8 +42,8 @@ class Runner:
 
 
     def next_guess(self,
-                tiles: Board,
-                banned: Optional[List[str]] = None) -> str:
+                   tiles: Board,
+                   banned: Optional[List[str]] = None) -> str:
 
         decode = lambda s: s.decode('utf-8')    \
                             .replace('\n', '')  \

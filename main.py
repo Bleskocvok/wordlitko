@@ -54,7 +54,8 @@ def autosolve(weber: WebInteract, runner: Runner) -> Board:
 def main() -> int:
 
     if len(sys.argv) < 4:
-        print(f'usage: {sys.argv[0]} DRIVER_PATH SOLVER_PATH DATABASE_PATH', file=stderr)
+        print(f'usage: {sys.argv[0]} DRIVER_PATH SOLVER_PATH DATABASE_PATH',
+              file=stderr)
         return 1
 
     DRIVER_PATH   = sys.argv[1]
@@ -65,7 +66,14 @@ def main() -> int:
     # “Weber” is a german name, apparently
     weber = WebInteract(URL, DRIVER_PATH)
 
-    runner = Runner(SOLVER_PATH, DATABASE_PATH)
+    cache = None
+    try:
+        with open(".solver_cache", "rb") as f:
+            cache = f.readlines()
+    except IOError:
+        cache = None
+
+    runner = Runner(SOLVER_PATH, DATABASE_PATH, cache)
 
     print(weber.get_title())
 

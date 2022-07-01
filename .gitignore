@@ -27,3 +27,4 @@
 # caches
 /__pycache__/
 /.mypy_cache/
+/.solver_cache

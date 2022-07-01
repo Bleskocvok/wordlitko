@@ -9,6 +9,7 @@ SOLVER_GARBAGE = solver.hi solver.o
 ANSWERS = data/answers.txt
 WORDS = data/possible.txt
 DATA = $(WORDS)
+CACHE = .solver_cache
 
 
 ifeq ($(OS),Windows_NT)
@@ -21,8 +22,8 @@ endif
 
 
 ifdef WIN
-	DRIVER = ./chromedriver.exe
-	SOLVER = ./solver.exe
+	DRIVER = .\chromedriver.exe
+	SOLVER = .\solver.exe
 	PYTHON = python3.exe
 	GHC    = ghc.exe
 else
@@ -42,15 +43,19 @@ $(SOLVER): $(SOLVER_SRC)
 time: $(SOLVER)
 	time -p $(SOLVER) '' "$(DATA)" | tail -n5
 
-run: $(SOLVER)
+run: $(SOLVER) $(CACHE)
 	$(PYTHON) $(APP_SRC) "$(DRIVER)" "$(SOLVER)" "$(DATA)"
 
 evaluate: $(SOLVER)
 	time -p $(PYTHON) $(EVAL_SRC) "$(ANSWERS)" "$(WORDS)" "$(SOLVER)"
 
+$(CACHE): $(SOLVER)
+	$(SOLVER) '....' "$(WORDS)" > "$(CACHE)"
+	echo done
+
 
 clean:
-	$(RM) $(SOLVER_GARBAGE)
+	$(RM) $(SOLVER_GARBAGE) $(CACHE)
 
 distclean: clean
 	$(RM) $(SOLVER)
