@@ -16,18 +16,19 @@ ifeq ($(OS),Windows_NT)
 	WIN = true
 endif
 
-ifdef WSL
-	WIN = true
-endif
+# # doesnt really work as intended
+# ifdef WSL
+# 	WIN = true
+# endif
 
 
 ifdef WIN
-	DRIVER = .\chromedriver.exe
+	DRIVER = .\driver\chromedriver.exe
 	SOLVER = .\solver.exe
 	PYTHON = python3.exe
 	GHC    = ghc.exe
 else
-	DRIVER = ./chromedriver
+	DRIVER = ./driver/chromedriver
 	SOLVER = ./solver
 	PYTHON = python3
 	GHC    = ghc

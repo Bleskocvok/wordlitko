@@ -1,7 +1,4 @@
 
-# driver
-/chromedriver*
-
 # binaries
 /solver
 /solver.o
