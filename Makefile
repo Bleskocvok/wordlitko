@@ -23,12 +23,12 @@ endif
 
 
 ifdef WIN
-	DRIVER = .\driver\chromedriver.exe
+	DRIVER = .\driver\geckodriver.exe
 	SOLVER = .\solver.exe
 	PYTHON = python3.exe
 	GHC    = ghc.exe
 else
-	DRIVER = ./driver/chromedriver
+	DRIVER = ./driver/geckodriver
 	SOLVER = ./solver
 	PYTHON = python3
 	GHC    = ghc

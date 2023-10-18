@@ -2,8 +2,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.firefox.options import Options as Options
 
 from typing import List, Optional
 import tkinter as tk
@@ -18,8 +18,8 @@ class WebInteract:
     def __init__(self, url: str, driver_path: str):
 
         service = Service(executable_path=driver_path)
-        options = ChromeOptions()
-        self.driver = webdriver.Chrome(service=service, options=options)
+        options = Options()
+        self.driver = webdriver.Firefox(service=service, options=options)
 
         self.driver.get(url)
 
@@ -38,13 +38,13 @@ class WebInteract:
 
         time.sleep(2)
 
-        # accept cookies
-        cock = self.driver  \
-               .find_element(By.XPATH, '//*[@id="pz-gdpr-btn-accept"]')
-        cock.click()
+        self.driver  \
+                .find_element(By.XPATH,
+                        '/html/body/div/div/div/div/div/div[2]/button[2]') \
+                .click()
 
         self.driver  \
-                .find_element(By.XPATH, '/html/body/div/div[3]/div/div')  \
+                .find_element(By.XPATH, '/html/body/div/div/dialog/div/button')  \
                 .click()
 
         self.driver.implicitly_wait(0.5)
@@ -59,9 +59,9 @@ class WebInteract:
 
 
     def get_score(self) -> str:
-    
+
         share = self.driver  \
-                .find_element(By.XPATH, '//*[@id="share-button"]')
+                .find_element(By.XPATH, '/html/body/div/div/dialog/div/div/div[3]/div[2]/div/button')
         share.click()
 
         # save clipboard contents to a variable
@@ -78,13 +78,15 @@ class WebInteract:
     def send_word(self, idx: int, word: str) -> Optional[List[Tile]]:
 
         self.body.send_keys(word + "\n")
+        self.body.send_keys(Keys.RETURN)
 
         self.driver.implicitly_wait(2.5)
 
         time.sleep(2.4)
 
         tiles = self.driver  \
-                .find_element(By.XPATH, f'/html/body/div/div[1]/div/div[{idx + 1}]')
+                .find_element(By.XPATH,
+                    f'/html/body/div/div/div[2]/main/div[1]/div/div[{idx + 1}]')
 
         if not tiles:
             raise RuntimeError('Tile cells elements not found')
