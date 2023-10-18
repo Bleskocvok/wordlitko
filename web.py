@@ -19,6 +19,7 @@ class WebInteract:
 
         service = Service(executable_path=driver_path)
         options = Options()
+        options.headless = True
         self.driver = webdriver.Firefox(service=service, options=options)
 
         self.driver.get(url)
@@ -60,13 +61,18 @@ class WebInteract:
 
     def get_score(self) -> str:
 
+        # start the thing for the clipboard thing
+        root = tk.Tk()
+        root.withdraw()
+        root.clipboard_clear()
+        root.clipboard_append('[EMPTY CLIPBOARD]')
+
         share = self.driver  \
-                .find_element(By.XPATH, '/html/body/div/div/dialog/div/div/div[3]/div[2]/div/button')
+                .find_element(By.XPATH,
+                    '/html/body/div/div/dialog/div/div/div[3]/div[2]/div/button')
         share.click()
 
         # save clipboard contents to a variable
-        root = tk.Tk()
-        root.withdraw()
         value = root.clipboard_get()
         return value
 

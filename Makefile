@@ -45,7 +45,7 @@ time: $(SOLVER)
 	time -p $(SOLVER) '' "$(DATA)" | tail -n5
 
 run: $(SOLVER) $(CACHE)
-	$(PYTHON) $(APP_SRC) "$(DRIVER)" "$(SOLVER)" "$(DATA)"
+	MOZ_HEADLESS=1 $(PYTHON) $(APP_SRC) "$(DRIVER)" "$(SOLVER)" "$(DATA)"
 
 evaluate: $(SOLVER)
 	time -p $(PYTHON) $(EVAL_SRC) "$(ANSWERS)" "$(WORDS)" "$(SOLVER)"

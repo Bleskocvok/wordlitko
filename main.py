@@ -7,7 +7,7 @@ import time
 import sys
 import datetime
 
-from rules import Tile, Board, all_correct
+from rules import Board, all_correct, show
 from runner import Runner
 from web import WebInteract
 
@@ -84,6 +84,10 @@ def run() -> int:
     tiles = autosolve(weber, runner)
 
     time.sleep(1.5)
+
+    print(f'\nBotle {len(tiles)}/6')
+    for row in tiles:
+        show(row)
 
     print()
     print(weber.get_score())

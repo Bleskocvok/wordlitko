@@ -59,7 +59,7 @@ class Stats:
 
     def record(self, i: int) -> None:
         self.data[i + 1] += 1
-    
+
     def __str__(self) -> str:
         res = ''
         for i in range(len(self.data)):
