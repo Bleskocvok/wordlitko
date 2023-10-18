@@ -51,11 +51,10 @@ def autosolve(weber: WebInteract, runner: Runner) -> Board:
     return tiles
 
 
-def main() -> int:
-
+def run() -> int:
     if len(sys.argv) < 4:
         print(f'usage: {sys.argv[0]} DRIVER_PATH SOLVER_PATH DATABASE_PATH',
-              file=stderr)
+                file=stderr)
         return 1
 
     DRIVER_PATH   = sys.argv[1]
@@ -73,17 +72,16 @@ def main() -> int:
     except IOError:
         cache = None
 
+    if len(cache) == 0:
+        raise RuntimeError("cache is empty")
+
     runner = Runner(SOLVER_PATH, DATABASE_PATH, cache)
 
     print(weber.get_title())
 
     weber.close_overlays()
 
-    try:
-        tiles = autosolve(weber, runner)
-    except Exception as e:
-        print(f'ERROR: {e}')
-        return 1
+    tiles = autosolve(weber, runner)
 
     time.sleep(1.5)
 
@@ -95,8 +93,14 @@ def main() -> int:
     return 0
 
 
+def main() -> int:
+
+    try:
+        return run()
+    except Exception as e:
+        print(f'ERROR: ({type(e)}) {e}')
+        return 1
+
+
 if __name__ == '__main__':
     sys.exit(main())
-
-
-

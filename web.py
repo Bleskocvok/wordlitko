@@ -36,10 +36,16 @@ class WebInteract:
 
     def close_overlays(self) -> None:
 
+        time.sleep(2)
+
         # accept cookies
         cock = self.driver  \
                .find_element(By.XPATH, '//*[@id="pz-gdpr-btn-accept"]')
         cock.click()
+
+        self.driver  \
+                .find_element(By.XPATH, '/html/body/div/div[3]/div/div')  \
+                .click()
 
         self.driver.implicitly_wait(0.5)
 
