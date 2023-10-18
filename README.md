@@ -15,9 +15,9 @@ cd wordlitko
 - `Python 3.8+`
     - package `selenium`
 
-- `Chrome`
-- `ChromeDriver` (for the appropriate Chrome version)
-    - (https://chromedriver.chromium.org/)
+- `Firefox`
+- `FirefoxDriver`
+    - (https://github.com/mozilla/geckodriver/releases)
 
 unzip webdriver to the folder `driver/`
 
