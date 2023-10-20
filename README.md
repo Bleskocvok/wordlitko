@@ -1,5 +1,4 @@
-# samořešítko pro wordle
-
+# Samořešítko pro wordle
 
 ## How to run
 
@@ -8,29 +7,26 @@ git clone https://github.com/Bleskocvok/wordlitko.git
 cd wordlitko
 ```
 
-1. Prerequisities
+1. Prerequisites
 
 - `GNU Make`
 - `GHC 9.0.1+`
 - `Python 3.8+`
     - package `selenium`
-
+    - package `Tkinter`
 - `Firefox`
-- `FirefoxDriver`
-    - (https://github.com/mozilla/geckodriver/releases)
+- `FirefoxDriver` (https://github.com/mozilla/geckodriver/releases)
 
-unzip webdriver to the folder `driver/`
+2. Unzip the webdriver to the folder `driver/`.
 
-run using
+3. Run using `make` to automatically launch the solver with appropriate parameters.
 ```sh
 make run
 ```
-to automatically launch the solver with appropriate parameters
 
+### Windows
 
-## Windows
-
-try running using
+3. Try running using. No guarantees.
 ```sh
 make.exe run
 ```
