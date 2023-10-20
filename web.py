@@ -108,6 +108,6 @@ class WebInteract:
             elif value == 'absent':     res.append(Tile(letter, Clue.GRAY))
             elif value == 'present':    res.append(Tile(letter, Clue.YELLOW))
             elif value == 'correct':    res.append(Tile(letter, Clue.GREEN))
-            else:                       raise RuntimeError('invalid value')
+            else:                       raise RuntimeError(f'unexpected value {value}')
 
         return res

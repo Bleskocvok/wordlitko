@@ -57,6 +57,8 @@ def run() -> int:
                 file=stderr)
         return 1
 
+    start = time.time()
+
     DRIVER_PATH   = sys.argv[1]
     SOLVER_PATH   = sys.argv[2]
     DATABASE_PATH = sys.argv[3]
@@ -83,9 +85,12 @@ def run() -> int:
 
     tiles = autosolve(weber, runner)
 
+    end = time.time()
+
     time.sleep(1.5)
 
-    print(f'\nBotle {len(tiles)}/6')
+    print('\nBotle {}/6 (time {:.2f}s)'
+            .format(len(tiles), end - start))
     for row in tiles:
         show(row)
 
