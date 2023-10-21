@@ -89,7 +89,7 @@ def run() -> int:
 
     time.sleep(1.5)
 
-    print('\nBotle {}/6 (time {:.2f}s)'
+    print('\nBotle {}/6 (time {:.2f}s)\n'
             .format(len(tiles), end - start))
     for row in tiles:
         show(row)
