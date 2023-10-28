@@ -17,6 +17,10 @@
 
 # trophy room
 /screenshots
+/score
+
+# secret
+.env
 
 # ide
 /.vscode/

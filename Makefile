@@ -5,6 +5,7 @@ APP_SRC = main.py
 EVAL_SRC = evaluation.py
 SOLVER_SRC = solver.hs
 SOLVER_GARBAGE = solver.hi solver.o
+SEND_DC = send_dc.py
 
 ANSWERS = data/answers.txt
 WORDS = data/possible.txt
@@ -45,7 +46,8 @@ time: $(SOLVER)
 	time -p $(SOLVER) '' "$(DATA)" | tail -n5
 
 run: $(SOLVER) $(CACHE)
-	MOZ_HEADLESS=1 $(PYTHON) $(APP_SRC) "$(DRIVER)" "$(SOLVER)" "$(DATA)"
+	MOZ_HEADLESS=1 $(PYTHON) $(APP_SRC) "$(DRIVER)" "$(SOLVER)" "$(DATA)" | tee score
+	python3 $(SEND_DC) score
 
 evaluate: $(SOLVER)
 	time -p $(PYTHON) $(EVAL_SRC) "$(ANSWERS)" "$(WORDS)" "$(SOLVER)"

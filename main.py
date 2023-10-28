@@ -28,7 +28,7 @@ def autosolve(weber: WebInteract, runner: Runner) -> Board:
     i: int = 0
     while i < 6:
 
-        print(f'{runner.get_cli_command(tiles)}')
+        print(f'{runner.get_cli_command(tiles)}', file=stderr)
 
         word: str = runner.next_guess(tiles, banned)
         ret = weber.send_word(i, word)
@@ -79,7 +79,7 @@ def run() -> int:
 
     runner = Runner(SOLVER_PATH, DATABASE_PATH, cache)
 
-    print(weber.get_title())
+#     print(weber.get_title())
 
     weber.close_overlays()
 
@@ -94,9 +94,6 @@ def run() -> int:
     for row in tiles:
         show(row)
 
-    print()
-    print(weber.get_score())
-
     weber.quit()
 
     return 0
@@ -107,7 +104,7 @@ def main() -> int:
     try:
         return run()
     except Exception as e:
-        print(f'ERROR: ({type(e)}) {e}')
+        print(f'ERROR: ({type(e)}) {e}', file=stderr)
         return 1
 
 
