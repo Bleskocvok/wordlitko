@@ -6,7 +6,6 @@ from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.options import Options as Options
 
 from typing import List, Optional
-import tkinter as tk
 import time
 
 from rules import Clue, Tile, WORD_LENGTH
@@ -60,21 +59,25 @@ class WebInteract:
 
 
     def get_score(self) -> str:
+        try:
+            import tkinter as tk
 
-        # start the thing for the clipboard thing
-        root = tk.Tk()
-        root.withdraw()
-        root.clipboard_clear()
-        root.clipboard_append('[EMPTY CLIPBOARD]')
+            # start the thing for the clipboard thing
+            root = tk.Tk()
+            root.withdraw()
+            root.clipboard_clear()
+            root.clipboard_append('[EMPTY CLIPBOARD]')
 
-        share = self.driver  \
-                .find_element(By.XPATH,
-                    '/html/body/div/div/dialog/div/div/div[3]/div[2]/div/button')
-        share.click()
+            share = self.driver  \
+                    .find_element(By.XPATH,
+                        '/html/body/div/div/dialog/div/div/div[3]/div[2]/div/button')
+            share.click()
 
-        # save clipboard contents to a variable
-        value = root.clipboard_get()
-        return value
+            # save clipboard contents to a variable
+            value = root.clipboard_get()
+            return value
+        except:
+            return None
 
 
     def screenshot(self, filename: str) -> None:
