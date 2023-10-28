@@ -11,7 +11,7 @@ RUN apt update \
     python3-pip \
     ghc
 
-RUN sudo snap install firefox
+RUN snap install firefox
 
 RUN pip install -r ./requirements.txt
 
