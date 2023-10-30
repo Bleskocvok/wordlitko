@@ -95,7 +95,7 @@ class WebInteract:
 
         tiles = self.driver  \
                 .find_element(By.XPATH,
-                    f'/html/body/div/div/div[2]/main/div[1]/div/div[{idx + 1}]')
+                    f'/html/body/div/div/div[4]/main/div[1]/div/div[{idx + 1}]')
 
         if not tiles:
             raise RuntimeError('Tile cells elements not found')
