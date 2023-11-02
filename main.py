@@ -5,6 +5,7 @@ from sys import stderr
 from typing import List
 import time
 import sys
+import os
 import datetime
 
 from rules import Board, all_correct, show
@@ -38,7 +39,7 @@ def autosolve(weber: WebInteract, runner: Runner) -> Board:
             weber.delete_word()
             continue
 
-        # show(ret)
+#         show(ret)
 
         tiles.append(ret)
 
@@ -52,20 +53,22 @@ def autosolve(weber: WebInteract, runner: Runner) -> Board:
 
 
 def run() -> int:
-    if len(sys.argv) < 4:
-        print(f'usage: {sys.argv[0]} DRIVER_PATH SOLVER_PATH DATABASE_PATH',
+    if len(sys.argv) < 3:
+        print(f'usage: {sys.argv[0]} SOLVER_PATH DATABASE_PATH',
                 file=stderr)
         return 1
 
     start = time.time()
 
-    DRIVER_PATH   = sys.argv[1]
-    SOLVER_PATH   = sys.argv[2]
-    DATABASE_PATH = sys.argv[3]
+    SOLVER_PATH   = sys.argv[1]
+    DATABASE_PATH = sys.argv[2]
     URL           = "https://www.nytimes.com/games/wordle/index.html"
 
     # “Weber” is a german name, apparently
-    weber = WebInteract(URL, DRIVER_PATH)
+    if os.getenv("DRIVER") == "chrome":
+        weber = WebInteract(URL, WebInteract.CHROME, os.getenv("CHROME_DRIVER"))
+    else:
+        weber = WebInteract(URL, WebInteract.FIREFOX, os.getenv("FIREFOX_DRIVER"))
 
     cache = None
     try:

@@ -4,10 +4,10 @@ WORKDIR /app
 
 COPY --chown=1001 . .
 
-RUN snap install firefox
-
 RUN apt update \
     && apt install -y \
+    wget \
+    unzip \
     make \
     python3.10 \
     python3-pip \
@@ -15,9 +15,11 @@ RUN apt update \
 
 RUN pip install -r ./requirements.txt
 
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN apt install -y ./google-chrome-stable_current_amd64.deb
+
 USER 1001
 
-RUN wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz \
-    && tar -xf geckodriver-v0.33.0-linux64.tar.gz -C driver/
+RUN ls -R .
 
 ENTRYPOINT [ "make", "run" ]

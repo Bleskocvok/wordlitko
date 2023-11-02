@@ -22,14 +22,17 @@ endif
 # 	WIN = true
 # endif
 
+DRIVER ?= chrome
 
 ifdef WIN
-	DRIVER = .\driver\geckodriver.exe
+	CH_DRIVER = .\driver\chromedriver.exe
+	G_DRIVER = .\driver\geckodriver.exe
 	SOLVER = .\solver.exe
 	PYTHON = python3.exe
 	GHC    = ghc.exe
 else
-	DRIVER = ./driver/geckodriver
+	CH_DRIVER = .\driver\chromedriver
+	G_DRIVER = .\driver\geckodriver
 	SOLVER = ./solver
 	PYTHON = python3
 	GHC    = ghc
@@ -46,7 +49,11 @@ time: $(SOLVER)
 	time -p $(SOLVER) '' "$(DATA)" | tail -n5
 
 run: $(SOLVER) $(CACHE)
-	MOZ_HEADLESS=1 $(PYTHON) $(APP_SRC) "$(DRIVER)" "$(SOLVER)" "$(DATA)" | tee score
+	export DRIVER=$(DRIVER)
+	export CHROME_DRIVER=$(CH_DRIVER)
+	export FIREFOX_DRIVER=$(G_DRIVER)
+	export MOZ_HEADLESS=1
+	$(PYTHON) $(APP_SRC) "$(SOLVER)" "$(DATA)" | tee score
 	python3 $(SEND_DC) score
 
 evaluate: $(SOLVER)
