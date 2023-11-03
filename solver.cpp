@@ -35,15 +35,15 @@ word_t mkword( const std::string& str )
 
 enum class color_t : int { GRAY, YELLOW, GREEN };
 
-struct rule_t
+struct clue_t
 {
     color_t col;
     int i;
     char c;
 
-    friend std::ostream& operator<<( std::ostream& o, const rule_t& r )
+    friend std::ostream& operator<<( std::ostream& o, const clue_t& r )
     {
-        return o << "rule_t{ " << int( r.col ) << ", " << r.i << ", " << r.c << " }";
+        return o << "clue_t{ " << int( r.col ) << ", " << r.i << ", " << r.c << " }";
     }
 };
 
@@ -82,9 +82,9 @@ auto load_file( const std::string& filename ) -> std::vector< word_t >
 }
 
 
-auto parse_rules( std::string_view str ) -> std::vector< rule_t >
+auto parse_clues( std::string_view str ) -> std::vector< clue_t >
 {
-    std::vector< rule_t > rules;
+    std::vector< clue_t > clues;
 
     auto low = []( unsigned char c ){ return std::tolower( c ); };
     auto get = [&]()
@@ -110,10 +110,10 @@ auto parse_rules( std::string_view str ) -> std::vector< rule_t >
             default:  col = color_t::GREEN;             break;
         }
 
-        rules.push_back({ .col = col, .i = i, .c = c });
+        clues.push_back({ .col = col, .i = i, .c = c });
     }
 
-    return rules;
+    return clues;
 }
 
 
@@ -126,9 +126,9 @@ int main( int argc, char** argv )
     }
 
     auto database = load_file( argv[ 2 ] );
-    auto rules = parse_rules( argv[ 1 ] );
+    auto clues = parse_clues( argv[ 1 ] );
 
-    for ( auto r : rules )
+    for ( auto r : clues )
         std::cout << r << std::endl;
 
     return 0;
