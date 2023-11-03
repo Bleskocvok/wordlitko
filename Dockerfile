@@ -6,6 +6,7 @@ COPY --chown=1001 . .
 
 RUN apt update \
     && apt install -y \
+    git \
     wget \
     unzip \
     make \
