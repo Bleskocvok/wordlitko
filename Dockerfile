@@ -20,6 +20,6 @@ RUN apt install -y ./google-chrome-stable_current_amd64.deb
 
 USER 1001
 
-RUN ls -R .
+RUN make
 
 ENTRYPOINT [ "make", "run" ]

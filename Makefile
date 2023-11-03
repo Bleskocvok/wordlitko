@@ -12,27 +12,21 @@ WORDS = data/possible.txt
 DATA = $(WORDS)
 CACHE = .solver_cache
 
+DRIVER ?= chrome
 
 ifeq ($(OS),Windows_NT)
 	WIN = true
 endif
 
-# # doesnt really work as intended
-# ifdef WSL
-# 	WIN = true
-# endif
-
-DRIVER ?= chrome
-
 ifdef WIN
-	CH_DRIVER = .\driver\chromedriver.exe
-	G_DRIVER = .\driver\geckodriver.exe
+	CHROME_DRIVER = .\driver\chromedriver.exe
+	FIREFOX_DRIVER = .\driver\geckodriver.exe
 	SOLVER = .\solver.exe
 	PYTHON = python3.exe
 	GHC    = ghc.exe
 else
-	CH_DRIVER = .\driver\chromedriver
-	G_DRIVER = .\driver\geckodriver
+	CHROME_DRIVER = ./driver/chromedriver
+	FIREFOX_DRIVER = ./driver/geckodriver
 	SOLVER = ./solver
 	PYTHON = python3
 	GHC    = ghc
@@ -48,20 +42,22 @@ $(SOLVER): $(SOLVER_SRC)
 time: $(SOLVER)
 	time -p $(SOLVER) '' "$(DATA)" | tail -n5
 
-run: $(SOLVER) $(CACHE)
-	export DRIVER=$(DRIVER)
-	export CHROME_DRIVER=$(CH_DRIVER)
-	export FIREFOX_DRIVER=$(G_DRIVER)
-	export MOZ_HEADLESS=1
+solve: $(SOLVER) $(CACHE)
+	export DRIVER=$(DRIVER); \
+	export MOZ_HEADLESS=0; \
+	export FIREFOX_DRIVER=$(FIREFOX_DRIVER); \
+	export CHROME_DRIVER=$(CHROME_DRIVER); \
 	$(PYTHON) $(APP_SRC) "$(SOLVER)" "$(DATA)" | tee score
-	python3 $(SEND_DC) score
+
+run: solve score
+	python3 $(SEND_DC) score chan
 
 evaluate: $(SOLVER)
 	time -p $(PYTHON) $(EVAL_SRC) "$(ANSWERS)" "$(WORDS)" "$(SOLVER)"
 
 $(CACHE): $(SOLVER)
 	$(SOLVER) '....' "$(WORDS)" > "$(CACHE)"
-	echo done
+	@echo done
 
 
 clean:
@@ -71,4 +67,4 @@ distclean: clean
 	$(RM) $(SOLVER)
 
 
-.PHONY: all clean distclean run evaluate time
+.PHONY: all clean distclean run solve evaluate time

@@ -64,11 +64,19 @@ def run() -> int:
     DATABASE_PATH = sys.argv[2]
     URL           = "https://www.nytimes.com/games/wordle/index.html"
 
+    DRIVER = os.getenv("DRIVER")
+    CHROME_DRIVER = os.getenv("CHROME_DRIVER")
+    FIREFOX_DRIVER = os.getenv("FIREFOX_DRIVER")
+
+    print(f'DRIVER = {DRIVER}', file=stderr)
+    print(f'CHROME_DRIVER = {CHROME_DRIVER}', file=stderr)
+    print(f'FIREFOX_DRIVER = {FIREFOX_DRIVER}', file=stderr)
+
     # “Weber” is a german name, apparently
-    if os.getenv("DRIVER") == "chrome":
-        weber = WebInteract(URL, WebInteract.CHROME, os.getenv("CHROME_DRIVER"))
+    if DRIVER == "chrome".casefold():
+        weber = WebInteract(URL, WebInteract.CHROME, CHROME_DRIVER)
     else:
-        weber = WebInteract(URL, WebInteract.FIREFOX, os.getenv("FIREFOX_DRIVER"))
+        weber = WebInteract(URL, WebInteract.FIREFOX, FIREFOX_DRIVER)
 
     cache = None
     try:
