@@ -9,31 +9,55 @@
 #include <array>        /* array */
 #include <stdexcept>    /* runtime_error */
 #include <cctype>       /* isalpha, tolower */
-#include <cstring>      /* strncmp */
+#include <cstring>      /* strncmp, memset */
 
+
+enum class color_t : int { GRAY, YELLOW, GREEN };
 
 constexpr int WORD = 5;
 
-using word_t = std::array< char, WORD >;
 
-
-auto wout( const word_t& w )
+struct word_t
 {
-    std::printf( "%.*s", WORD, w.data() );
-}
+    std::array< char, WORD > data;
 
-word_t mkword( const std::string& str )
-{
-    if ( str.length() != WORD )
-        throw std::runtime_error( "mkword" );
+    word_t() = default;
 
-    word_t res;
-    for ( int i = 0; i < WORD; ++i )
-        res[ i ] = str[ i ];
-    return res;
-}
+    word_t( const std::string& str )
+    {
+        if ( str.length() != WORD )
+            throw std::runtime_error( "word_t" );
 
-enum class color_t : int { GRAY, YELLOW, GREEN };
+        for ( int i = 0; i < WORD; ++i )
+            data[ i ] = str[ i ];
+    }
+
+    char operator[]( int i ) const { return data[ i ]; }
+    char& operator[]( int i ) { return data[ i ]; }
+
+    bool has( char c ) const
+    {
+        return std::find( data.begin(), data.end(), c ) != data.end();
+    }
+
+    friend auto operator==( const word_t& a, const word_t& b )
+    {
+        return a.data == b.data;
+    }
+
+    friend auto operator<=>( const word_t& a, const word_t& b )
+    {
+        return a.data <=> b.data;
+    }
+
+    friend std::ostream& operator<<( std::ostream& o, const word_t& w )
+    {
+        for ( int i = 0; i < WORD; ++i )
+            o << w.data[ i ];
+        return o;
+    }
+};
+
 
 struct clue_t
 {
@@ -43,12 +67,62 @@ struct clue_t
 
     friend std::ostream& operator<<( std::ostream& o, const clue_t& r )
     {
-        return o << "clue_t{ " << int( r.col ) << ", " << r.i << ", " << r.c << " }";
+        auto bg = []( auto col )
+        {
+            switch ( col )
+            {
+                case color_t::GRAY:   return "\033[100m";
+                case color_t::YELLOW: return "\033[43m";
+                case color_t::GREEN:  return "\033[42m";
+            }
+            return "";
+        };
+        return o << "\033[30m" << bg( r.col ) << " " << r.c << " " << "\033[0m";
+    }
+
+    bool consistent( const word_t& w ) const
+    {
+        switch ( col )
+        {
+            case color_t::GREEN:  return w[ i ] == c;
+            case color_t::YELLOW: return w[ i ] != c && w.has( c );
+            case color_t::GRAY:   return w[ i ] != c;
+        }
     }
 };
 
 
-auto load_file( const std::string& filename ) -> std::vector< word_t >
+
+inline bool accepts( const std::vector< clue_t >& clues, const word_t& w )
+{
+    static bool yg_chars[ 256 ] = { 0 };
+    std::memset( yg_chars, 0, sizeof yg_chars );
+
+    for ( const auto& clue : clues )
+    {
+        if ( clue.col == color_t::GREEN || clue.col == color_t::YELLOW )
+            yg_chars[ static_cast< unsigned char >( clue.c ) ] = true;
+    }
+
+    auto gray = [&]( auto clue )
+    {
+        if ( yg_chars[ static_cast< unsigned char >( clue.c ) ] )
+            return true;
+        return !w.has( clue.c );
+    };
+
+    for ( const auto& clue : clues )
+    {
+        if ( !clue.consistent( w ) )
+            return false;
+
+        if ( clue.col == color_t::GRAY && !gray( clue ) )
+            return false;
+    }
+    return true;
+}
+
+inline auto load_file( const std::string& filename ) -> std::vector< word_t >
 {
     auto words = std::vector< word_t >{};
     auto in = std::ifstream( filename );
@@ -70,11 +144,11 @@ auto load_file( const std::string& filename ) -> std::vector< word_t >
                 []( unsigned char c ){ return std::tolower( c ); } );
 
         if ( line.length() == WORD )
-            words.push_back( mkword( line ) );
+            words.emplace_back( line);
     }
 
     std::sort( words.begin(), words.end(), []( const auto& a, const auto& b )
-            { return std::strncmp( a.data(), b.data(), WORD ) < 0; } );
+            { return std::strncmp( a.data.data(), b.data.data(), WORD ) < 0; } );
 
     std::unique( words.begin(), words.end() );
 
@@ -82,7 +156,7 @@ auto load_file( const std::string& filename ) -> std::vector< word_t >
 }
 
 
-auto parse_clues( std::string_view str ) -> std::vector< clue_t >
+inline auto parse_clues( std::string_view str ) -> std::vector< clue_t >
 {
     std::vector< clue_t > clues;
 
@@ -113,6 +187,21 @@ auto parse_clues( std::string_view str ) -> std::vector< clue_t >
         clues.push_back({ .col = col, .i = i, .c = c });
     }
 
+    return clues;
+}
+
+inline auto get_clues( word_t guess, word_t chosen ) -> std::vector< clue_t >
+{
+    auto color = [&]( char g, char c ) -> color_t
+    {
+        if ( g == c ) return color_t::GREEN;
+        if ( chosen.has( g ) ) return color_t::YELLOW;
+        return color_t::GRAY;
+    };
+
+    auto clues = std::vector< clue_t >{};
+    for ( int i = 0; i < WORD; ++i )
+        clues.push_back({ color( guess[ i ], chosen[ i ] ), i, guess[ i ] });
     return clues;
 }
 
