@@ -3,13 +3,16 @@
 #include <fstream>      /* ifstream */
 #include <cstdio>       /* printf */
 #include <vector>       /* vector, erase_if */
-#include <algorithm>    /* transform, sort, unique */
+#include <algorithm>    /* transform, sort, unique, count_if */
 #include <string>       /* string, getline */
 #include <string_view>  /* string_view */
 #include <array>        /* array */
 #include <stdexcept>    /* runtime_error */
 #include <cctype>       /* isalpha, tolower */
 #include <cstring>      /* strncmp, memset */
+#include <utility>      /* pair */
+#include <cstddef>      /* size_t */
+#include <cmath>        /* ceil */
 
 
 enum class color_t : int { GRAY, YELLOW, GREEN };
@@ -37,7 +40,11 @@ struct word_t
 
     bool has( char c ) const
     {
-        return std::find( data.begin(), data.end(), c ) != data.end();
+//         return std::find( data.begin(), data.end(), c ) != data.end();
+        for ( char cc : data )
+            if ( c == cc )
+                return true;
+        return false;
     }
 
     friend auto operator==( const word_t& a, const word_t& b )
@@ -88,6 +95,7 @@ struct clue_t
             case color_t::YELLOW: return w[ i ] != c && w.has( c );
             case color_t::GRAY:   return w[ i ] != c;
         }
+        return false;
     }
 };
 
@@ -104,19 +112,19 @@ inline bool accepts( const std::vector< clue_t >& clues, const word_t& w )
             yg_chars[ static_cast< unsigned char >( clue.c ) ] = true;
     }
 
-    auto gray = [&]( auto clue )
-    {
-        if ( yg_chars[ static_cast< unsigned char >( clue.c ) ] )
-            return true;
-        return !w.has( clue.c );
-    };
+//     auto gray = [&]( auto clue )
+//     {
+//         return yg_chars[ static_cast< unsigned char >( clue.c ) ] || !w.has( clue.c );
+//     };
 
     for ( const auto& clue : clues )
     {
         if ( !clue.consistent( w ) )
             return false;
 
-        if ( clue.col == color_t::GRAY && !gray( clue ) )
+        if ( clue.col == color_t::GRAY
+                && !yg_chars[ static_cast< unsigned char >( clue.c ) ]
+                && w.has( clue.c ))
             return false;
     }
     return true;
@@ -150,7 +158,7 @@ inline auto load_file( const std::string& filename ) -> std::vector< word_t >
     std::sort( words.begin(), words.end(), []( const auto& a, const auto& b )
             { return std::strncmp( a.data.data(), b.data.data(), WORD ) < 0; } );
 
-    std::unique( words.begin(), words.end() );
+    words.erase( std::unique( words.begin(), words.end() ), words.end() );
 
     return words;
 }
@@ -206,6 +214,57 @@ inline auto get_clues( word_t guess, word_t chosen ) -> std::vector< clue_t >
 }
 
 
+inline void filter_accepting( std::vector< word_t >& words,
+                              const std::vector< clue_t >& clues )
+{
+    std::erase_if( words, [&]( const auto& w ){ return !accepts( clues, w ); } );
+}
+
+
+inline long count_accepting( const std::vector< word_t >& words,
+                             const std::vector< clue_t >& clues )
+{
+    return std::count_if( words.begin(), words.end(),
+            [&]( const auto& w ){ return accepts( clues, w ); } );
+}
+
+
+inline float calculate_score( const word_t& guess,
+                              const std::vector< word_t >& words )
+{
+    std::cerr << guess << std::endl;
+
+    auto scores = std::vector< long >{};
+    scores.reserve( words.size() );
+
+    auto clues = std::vector< clue_t >{};
+
+    for ( const auto& chosen : words )
+    {
+        clues = get_clues( guess, chosen );
+        scores.push_back( count_accepting( words, clues ) );
+    }
+
+    auto mid = scores.size() / 2 - 1;
+    return std::ceil( ( scores[ mid ] + scores[ mid + 1 ] ) / 2.0 );
+}
+
+
+inline void order_best( std::vector< word_t >& words )
+{
+    auto scores = std::vector< std::pair< float, word_t > >{};
+    scores.reserve( words.size() );
+
+    for ( const auto& w : words )
+        scores.emplace_back( calculate_score( w, words ), w );
+
+    std::sort( scores.begin(), scores.end() );
+
+    for ( std::size_t i = 0; i < scores.size(); ++i )
+        words[ i ] = scores[ i ].second;
+}
+
+
 int main( int argc, char** argv )
 {
     if ( argc < 3 )
@@ -217,8 +276,15 @@ int main( int argc, char** argv )
     auto database = load_file( argv[ 2 ] );
     auto clues = parse_clues( argv[ 1 ] );
 
-    for ( auto r : clues )
-        std::cout << r << std::endl;
+//     for ( auto r : clues )
+//         std::cout << r << std::endl;
+
+    filter_accepting( database, clues );
+
+    order_best( database );
+
+    for ( auto w : database )
+        std::cout << w << std::endl;
 
     return 0;
 }
