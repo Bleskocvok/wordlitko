@@ -9,7 +9,7 @@ import System.Exit
 import Control.Monad ( forM_, (<$!>) )
 import Data.Functor ( (<&>) )
 import Data.Char ( isLetter, toLower )
-import Data.List ( group, sort, sortBy, sortOn )
+import Data.List ( group, sort, sortBy, sortOn, nub )
 import Data.Foldable ( foldr' )
 import Data.Array as A ( Array, elems, (!), listArray )
 
@@ -56,7 +56,7 @@ main = do
 solve :: String -> String -> IO ()
 solve input database = do
     words <- parseData <$!> getLines database
-    let rules = parseRules input
+    let rules = nub $ parseRules input
         filtered = applyRules rules words
         every = if len > 50 then len `div` 50 else 1
             where len = length filtered
