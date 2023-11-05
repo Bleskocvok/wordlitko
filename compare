@@ -1,0 +1,28 @@
+#!/bin/bash
+
+DATA="data.txt"
+
+clues='.a.!m..^m'
+
+[ -n "$1" ] && clues="$1"
+
+
+quit() {
+    code="$1"
+    shift 1
+    echo $*
+    exit "$code"
+}
+
+echo "$clues"
+
+make solver && time -p ./solver "$clues" "$DATA" > .out.hs
+CXX=clang++ make csolve && time -p ./csolve "$clues" "$DATA" > .out.cpp
+
+cat .out.hs | sort > .sorted.hs
+cat .out.cpp | sort > .sorted.cpp
+
+diff .sorted.hs .sorted.cpp || quit 1 "sorted"
+diff .out.hs .out.cpp || quit 1 "real deal"
+
+rm .sorted.hs .sorted.cpp .out.hs .out.cpp
