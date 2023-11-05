@@ -25,8 +25,6 @@ RUN unzip chromedriver-linux64.zip -d driver \
 
 USER 1001
 
-RUN timedatectl set-timezone 'Europe/Prague'
-
 RUN make
 
 ENTRYPOINT [ "bash", "update_run" ]
