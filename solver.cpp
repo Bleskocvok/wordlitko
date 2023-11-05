@@ -150,10 +150,22 @@ inline auto load_file( const std::string& filename ) -> std::vector< word_t >
 }
 
 
-inline auto parse_clues( std::string_view str ) -> std::vector< clue_t >
+inline void assign_elsewhere( std::vector< clue_t >& clues )
 {
     bool yg_chars[ 256 ] = { 0 };
 
+    for ( auto& clue : clues )
+        if ( clue.col == color_t::GREEN || clue.col == color_t::YELLOW )
+            yg_chars[ static_cast< unsigned char >( clue.c ) ] = true;
+
+    for ( auto& clue : clues )
+        if ( clue.col == color_t::GRAY )
+            clue.elsewhere = yg_chars[ static_cast< unsigned char >( clue.c ) ];
+}
+
+
+inline auto parse_clues( std::string_view str ) -> std::vector< clue_t >
+{
     std::vector< clue_t > clues;
 
     auto low = []( unsigned char c ){ return std::tolower( c ); };
@@ -181,13 +193,9 @@ inline auto parse_clues( std::string_view str ) -> std::vector< clue_t >
         }
 
         clues.push_back({ .col = col, .i = i, .c = c });
-        if ( col == color_t::GREEN || col == color_t::YELLOW )
-            yg_chars[ static_cast< unsigned char >( c ) ] = true;
     }
 
-    for ( auto& clue : clues )
-        if ( clue.col == color_t::GRAY )
-            clue.elsewhere = yg_chars[ static_cast< unsigned char >( clue.c ) ];
+    assign_elsewhere( clues );
 
     return clues;
 }
@@ -204,6 +212,9 @@ inline auto get_clues( word_t guess, word_t chosen ) -> std::vector< clue_t >
     auto clues = std::vector< clue_t >{};
     for ( int i = 0; i < WORD; ++i )
         clues.push_back({ color( guess[ i ], chosen[ i ] ), i, guess[ i ] });
+
+    assign_elsewhere( clues );
+
     return clues;
 }
 
