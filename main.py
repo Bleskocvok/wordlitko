@@ -78,17 +78,7 @@ def run() -> int:
     else:
         weber = WebInteract(URL, WebInteract.FIREFOX, FIREFOX_DRIVER)
 
-    cache = None
-    try:
-        with open(".solver_cache", "rb") as f:
-            cache = f.readlines()
-    except IOError:
-        cache = None
-
-    if len(cache) == 0:
-        raise RuntimeError("cache is empty")
-
-    runner = Runner(SOLVER_PATH, DATABASE_PATH, cache)
+    runner = Runner(SOLVER_PATH, DATABASE_PATH)
 
 #     print(weber.get_title())
 
