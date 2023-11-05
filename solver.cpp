@@ -40,7 +40,6 @@ struct word_t
 
     bool has( char c ) const
     {
-//         return std::find( data.begin(), data.end(), c ) != data.end();
         for ( char cc : data )
             if ( c == cc )
                 return true;
@@ -111,11 +110,6 @@ inline bool accepts( const std::vector< clue_t >& clues, const word_t& w )
         if ( clue.col == color_t::GREEN || clue.col == color_t::YELLOW )
             yg_chars[ static_cast< unsigned char >( clue.c ) ] = true;
     }
-
-//     auto gray = [&]( auto clue )
-//     {
-//         return yg_chars[ static_cast< unsigned char >( clue.c ) ] || !w.has( clue.c );
-//     };
 
     for ( const auto& clue : clues )
     {
@@ -232,7 +226,8 @@ inline long count_accepting( const std::vector< word_t >& words,
 inline float calculate_score( const word_t& guess,
                               const std::vector< word_t >& words )
 {
-    std::cerr << guess << std::endl;
+    if ( words.empty() )
+        return 1;
 
     auto scores = std::vector< long >{};
     scores.reserve( words.size() );
@@ -244,6 +239,11 @@ inline float calculate_score( const word_t& guess,
         clues = get_clues( guess, chosen );
         scores.push_back( count_accepting( words, clues ) );
     }
+
+    std::sort( scores.begin(), scores.end() );
+
+    if ( scores.size() < 2 )
+        return scores.front();
 
     auto mid = scores.size() / 2 - 1;
     return std::ceil( ( scores[ mid ] + scores[ mid + 1 ] ) / 2.0 );
@@ -275,9 +275,6 @@ int main( int argc, char** argv )
 
     auto database = load_file( argv[ 2 ] );
     auto clues = parse_clues( argv[ 1 ] );
-
-//     for ( auto r : clues )
-//         std::cout << r << std::endl;
 
     filter_accepting( database, clues );
 

@@ -8,10 +8,9 @@ import Data.Functor ( (<&>) )
 import Control.Monad ( forM_, (<$!>) )
 import Data.Char ( isLetter, toLower )
 import Data.List ( group, sort, sortBy, sortOn )
-import System.Environment ( getArgs )
+import System.Environment ( getArgs, getProgName )
 import Data.Foldable ( foldr' )
 import System.Exit
-import System.Environment
 
 -- apparently not in `base`, therefore not portable necessarily
 import Data.Array as A ( Array, elems, (!), listArray )
@@ -129,7 +128,7 @@ evaluate wrds a = mean
     where
         remain ges cho = applyRules (getRules ges cho) wrds
         simulate wrds ges = remain ges `map` wrds
-        getMean = median . (length `map`)
+        getMean = median . sort . (length `map`)
         mean = getMean $ simulate wrds a
 
 
@@ -145,19 +144,19 @@ orderBest wrds = ((fst `map`) . sortOn snd) (zip wrds vals)
 
 applyRules :: [Rule] -> [Word5] -> [Word5]
 applyRules rls lst = foldr' (\r acc -> filter (accept rls r) acc) lst rls
+-- applyRules rls = filter (\w -> all (\r -> accept rls r w) rls)
 
 
 accept :: [Rule] -> Rule -> Word5 -> Bool
 accept rls r = case r of
     Green  i ch -> isAt i ch
-    Yellow i ch -> \str -> present ch str && not (isAt i ch str)
+    Yellow i ch -> \str -> not (isAt i ch str) && present ch str
     Gray   i ch ->
         if elsewhere ch rls
         then not . isAt i ch
         else not . present ch
     where
-        elsewhere ch = not . null . filter yellOrGreen . filter ((ch ==) . getC)
+        elsewhere ch = any yellOrGreen . filter ((ch ==) . getC)
         yellOrGreen r = case r of Yellow _ _ -> True
                                   Green  _ _ -> True
                                   _          -> False
-
