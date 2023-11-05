@@ -21,13 +21,13 @@ make hsolve && make csolve
 
 if [ "$?" != 0 ]; then quit 1 "compilation"; fi
 
-time -p ./solver "$clues" "$DATA" > .out.hs
+time -p ./hsolve "$clues" "$DATA" > .out.hs
 time -p ./csolve "$clues" "$DATA" > .out.cpp
 
 cat .out.hs | sort > .sorted.hs
 cat .out.cpp | sort > .sorted.cpp
 
-diff .sorted.hs .sorted.cpp || quit 1 "sorted"
-diff .out.hs .out.cpp || quit 1 "real deal"
+1>&2 diff .sorted.hs .sorted.cpp || quit 1 "sorted"
+1>&2 diff .out.hs .out.cpp       || quit 1 "real deal"
 
 rm .sorted.hs .sorted.cpp .out.hs .out.cpp
