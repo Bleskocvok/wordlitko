@@ -54,7 +54,7 @@ ctime: $(HSOLVER)
 
 solve: $(HSOLVER)
 	export DRIVER=$(DRIVER); \
-	export MOZ_HEADLESS=0; \
+	export MOZ_HEADLESS=1; \
 	export FIREFOX_DRIVER=$(FIREFOX_DRIVER); \
 	export CHROME_DRIVER=$(CHROME_DRIVER); \
 	$(PYTHON) $(APP_SRC) "$(HSOLVER)" "$(DATA)" | tee score

@@ -16,8 +16,13 @@ quit() {
 
 echo "$clues"
 
-make solver && time -p ./solver "$clues" "$DATA" > .out.hs
-CXX=clang++ make csolve && time -p ./csolve "$clues" "$DATA" > .out.cpp
+export CXX=clang++
+make hsolve && make csolve
+
+if [ "$?" != 0 ]; then quit 1 "compilation"; fi
+
+time -p ./solver "$clues" "$DATA" > .out.hs
+time -p ./csolve "$clues" "$DATA" > .out.cpp
 
 cat .out.hs | sort > .sorted.hs
 cat .out.cpp | sort > .sorted.cpp
