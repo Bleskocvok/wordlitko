@@ -17,12 +17,12 @@ import Data.Array as A ( Array, elems, (!), listArray )
 data Color = Green | Yellow | Gray
            deriving ( Show, Eq )
 
-data Clue = Clue !Color !Int !Char
+data Clue = Clue !Color !Int !Char !Bool
           deriving ( Show, Eq )
 
 
 getC :: Clue -> Char
-getC (Clue _ _ c) = c
+getC (Clue _ _ c _) = c
 
 
 -- EFFICIENT DATA TYPE FOR REPRESENTING A 5-LETTER WORD
@@ -64,16 +64,16 @@ solve input database = do
 
 
 parseClues :: String -> [Clue]
-parseClues = parseClues' 0
+parseClues = assignElsewhere . parseClues' 0
     where
         parseClues' i str = case str of
             ('.'     : xs) -> parseClues' (i + 1) xs
             (' '     : xs) -> parseClues' i xs
             ('\n'    : xs) -> parseClues' i xs
             ('\r'    : xs) -> parseClues' i xs
-            ('!' : c : xs) -> Clue Gray   i (toLower c) : parseClues' i xs
-            ('^' : c : xs) -> Clue Yellow i (toLower c) : parseClues' i xs
-            (      c : xs) -> Clue Green  i (toLower c) : parseClues' i xs
+            ('!' : c : xs) -> Clue Gray   i (toLower c) False : parseClues' i xs
+            ('^' : c : xs) -> Clue Yellow i (toLower c) False : parseClues' i xs
+            (      c : xs) -> Clue Green  i (toLower c) False : parseClues' i xs
             _              -> []
 
 
@@ -98,13 +98,14 @@ sortUnique = (head `map`) . group . sort
 
 
 getClues :: Word5 -> Word5 -> [Clue]
-getClues guess chosen = zipWith3 oneChar [0 ..] (fromWord guess)
-                                                (fromWord chosen)
+getClues guess chosen = aew $! zipWith3 oneChar [0 ..] (fromWord guess)
+                                                      (fromWord chosen)
     where
+        aew = assignElsewhere
         oneChar i g c
-            | g == c = Clue Green i c
-            | g `present` chosen = Clue Yellow i g
-            | otherwise = Clue Gray i g
+            | g == c = Clue Green i c False
+            | g `present` chosen = Clue Yellow i g False
+            | otherwise = Clue Gray i g False
 
         -- TODO: account for repeated letters in chosen
         -- counts = (\c -> (c, length $ filter (c ==) lst)) `map` lst
@@ -141,6 +142,16 @@ orderBest chosen wrds = ((fst `map`) . sortOn snd) (zip wrds vals)
     where
         vals = evaluate chosen `map` wrds
 
+assignElsewhere :: [Clue] -> [Clue]
+assignElsewhere clues = assign `map` clues
+    where
+        assign (Clue Gray i c ew) = Clue Gray i c (elsewhere c clues)
+        assign clue = clue
+        elsewhere c = any yellOrGreen . filter ((c ==) . getC)
+        yellOrGreen (Clue col _ _ _) = case col of
+                                    Yellow -> True
+                                    Green  -> True
+                                    _      -> False
 
 -- format:
 -- .A.^N.
@@ -153,16 +164,10 @@ applyClues rls lst = foldr' (\r acc -> filter (accept rls r) acc) lst rls
 
 
 accept :: [Clue] -> Clue -> Word5 -> Bool
-accept rls (Clue col i c) = case col of
+accept rls (Clue col i c elsewhere) = case col of
     Green  -> isAt i c
     Yellow -> \str -> not (isAt i c str) && present c str
     Gray   ->
-        if elsewhere c rls
+        if elsewhere
         then not . isAt i c
         else not . present c
-    where
-        elsewhere c = any yellOrGreen . filter ((c ==) . getC)
-        yellOrGreen (Clue col _ _) = case col of
-                                    Yellow -> True
-                                    Green  -> True
-                                    _      -> False
