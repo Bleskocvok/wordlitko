@@ -14,17 +14,15 @@ import Data.Foldable ( foldr' )
 import Data.Array as A ( Array, elems, (!), listArray )
 
 
-data Rule = Green  !Int !Char
-          | Yellow !Int !Char
-          | Gray   !Int !Char
+data Color = Green | Yellow | Gray
+           deriving ( Show, Eq )
+
+data Clue = Clue !Color !Int !Char
           deriving ( Show, Eq )
 
 
-getC :: Rule -> Char
-getC r = case r of
-    Green  _ c -> c
-    Yellow _ c -> c
-    Gray   _ c -> c
+getC :: Clue -> Char
+getC (Clue _ _ c) = c
 
 
 -- EFFICIENT DATA TYPE FOR REPRESENTING A 5-LETTER WORD
@@ -56,8 +54,8 @@ main = do
 solve :: String -> String -> IO ()
 solve input database = do
     words <- parseData <$!> getLines database
-    let rules = nub $ parseRules input
-        filtered = applyRules rules words
+    let rules = nub $ parseClues input
+        filtered = applyClues rules words
         every = if len > 50 then len `div` 50 else 1
             where len = length filtered
         chosen = everyNth every filtered
@@ -65,17 +63,17 @@ solve input database = do
     forM_ sorted putStrLn
 
 
-parseRules :: String -> [Rule]
-parseRules = parseRules' 0
+parseClues :: String -> [Clue]
+parseClues = parseClues' 0
     where
-        parseRules' i str = case str of
-            ('.'     : xs) -> parseRules' (i + 1) xs
-            (' '     : xs) -> parseRules' i xs
-            ('\n'    : xs) -> parseRules' i xs
-            ('\r'    : xs) -> parseRules' i xs
-            ('!' : c : xs) -> Gray   i (toLower c) : parseRules' i xs
-            ('^' : c : xs) -> Yellow i (toLower c) : parseRules' i xs
-            (      c : xs) -> Green  i (toLower c) : parseRules' i xs
+        parseClues' i str = case str of
+            ('.'     : xs) -> parseClues' (i + 1) xs
+            (' '     : xs) -> parseClues' i xs
+            ('\n'    : xs) -> parseClues' i xs
+            ('\r'    : xs) -> parseClues' i xs
+            ('!' : c : xs) -> Clue Gray   i (toLower c) : parseClues' i xs
+            ('^' : c : xs) -> Clue Yellow i (toLower c) : parseClues' i xs
+            (      c : xs) -> Clue Green  i (toLower c) : parseClues' i xs
             _              -> []
 
 
@@ -99,14 +97,14 @@ sortUnique :: [Word5] -> [Word5]
 sortUnique = (head `map`) . group . sort
 
 
-getRules :: Word5 -> Word5 -> [Rule]
-getRules guess chosen = zipWith3 oneChar [0 ..] (fromWord guess)
+getClues :: Word5 -> Word5 -> [Clue]
+getClues guess chosen = zipWith3 oneChar [0 ..] (fromWord guess)
                                                 (fromWord chosen)
     where
         oneChar i g c
-            | g == c = Green i c
-            | g `present` chosen = Yellow i g
-            | otherwise = Gray i g
+            | g == c = Clue Green i c
+            | g `present` chosen = Clue Yellow i g
+            | otherwise = Clue Gray i g
 
         -- TODO: account for repeated letters in chosen
         -- counts = (\c -> (c, length $ filter (c ==) lst)) `map` lst
@@ -127,7 +125,7 @@ median lst = fromIntegral $ ceiling $ fromIntegral (atLift2 (+) (mid - 1) lst) /
 evaluate :: Fractional a => [Word5] -> Word5 -> a
 evaluate wrds a = mean
     where
-        remain ges cho = applyRules (getRules ges cho) wrds
+        remain ges cho = applyClues (getClues ges cho) wrds
         simulate wrds ges = remain ges `map` wrds
         getMean = median . sort . (length `map`)
         mean = getMean $ simulate wrds a
@@ -148,22 +146,23 @@ orderBest chosen wrds = ((fst `map`) . sortOn snd) (zip wrds vals)
 -- .A.^N.
 
 
-applyRules :: [Rule] -> [Word5] -> [Word5]
-applyRules rls lst = foldr' (\r acc -> filter (accept rls r) acc) lst rls
+applyClues :: [Clue] -> [Word5] -> [Word5]
+applyClues rls lst = foldr' (\r acc -> filter (accept rls r) acc) lst rls
 -- alternate implementation that feels like it should run faster, but doesn't
--- applyRules rls = filter (\w -> all (\r -> accept rls r w) rls)
+-- applyClues rls = filter (\w -> all (\r -> accept rls r w) rls)
 
 
-accept :: [Rule] -> Rule -> Word5 -> Bool
-accept rls r = case r of
-    Green  i c -> isAt i c
-    Yellow i c -> \str -> not (isAt i c str) && present c str
-    Gray   i c ->
+accept :: [Clue] -> Clue -> Word5 -> Bool
+accept rls (Clue col i c) = case col of
+    Green  -> isAt i c
+    Yellow -> \str -> not (isAt i c str) && present c str
+    Gray   ->
         if elsewhere c rls
         then not . isAt i c
         else not . present c
     where
         elsewhere c = any yellOrGreen . filter ((c ==) . getC)
-        yellOrGreen r = case r of Yellow _ _ -> True
-                                  Green  _ _ -> True
-                                  _          -> False
+        yellOrGreen (Clue col _ _) = case col of
+                                    Yellow -> True
+                                    Green  -> True
+                                    _      -> False
