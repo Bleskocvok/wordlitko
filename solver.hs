@@ -4,16 +4,13 @@
 module Main where
 
 
-import Data.Functor ( (<&>) )
-import Control.Monad ( forM_, (<$!>) )
-import Data.Char ( isLetter, toLower )
-import Data.List ( group, sort, sortBy, sortOn )
 import System.Environment ( getArgs, getProgName )
 import System.Exit
+import Control.Monad ( forM_, (<$!>) )
+import Data.Functor ( (<&>) )
+import Data.Char ( isLetter, toLower )
+import Data.List ( group, sort, sortBy, sortOn )
 import Data.Foldable ( foldr' )
-
-
--- apparently not in `base`, therefore not portable necessarily
 import Data.Array as A ( Array, elems, (!), listArray )
 
 
@@ -43,7 +40,7 @@ present :: Char -> Word5 -> Bool
 present = elem
 
 isAt :: Int -> Char -> Word5 -> Bool
-isAt i ch = (ch ==) . (A.! i)
+isAt i c = (c ==) . (A.! i)
 
 
 main :: IO ()
@@ -72,14 +69,14 @@ parseRules :: String -> [Rule]
 parseRules = parseRules' 0
     where
         parseRules' i str = case str of
-            ('.'      : xs) -> parseRules' (i + 1) xs
-            (' '      : xs) -> parseRules' i xs
-            ('\n'     : xs) -> parseRules' i xs
-            ('\r'     : xs) -> parseRules' i xs
-            ('!' : ch : xs) -> Gray   i (toLower ch) : parseRules' i xs
-            ('^' : ch : xs) -> Yellow i (toLower ch) : parseRules' i xs
-            (      ch : xs) -> Green  i (toLower ch) : parseRules' i xs
-            _               -> []
+            ('.'     : xs) -> parseRules' (i + 1) xs
+            (' '     : xs) -> parseRules' i xs
+            ('\n'    : xs) -> parseRules' i xs
+            ('\r'    : xs) -> parseRules' i xs
+            ('!' : c : xs) -> Gray   i (toLower c) : parseRules' i xs
+            ('^' : c : xs) -> Yellow i (toLower c) : parseRules' i xs
+            (      c : xs) -> Green  i (toLower c) : parseRules' i xs
+            _              -> []
 
 
 parseData :: [String] -> [Word5]
@@ -153,19 +150,20 @@ orderBest chosen wrds = ((fst `map`) . sortOn snd) (zip wrds vals)
 
 applyRules :: [Rule] -> [Word5] -> [Word5]
 applyRules rls lst = foldr' (\r acc -> filter (accept rls r) acc) lst rls
+-- alternate implementation that feels like it should run faster, but doesn't
 -- applyRules rls = filter (\w -> all (\r -> accept rls r w) rls)
 
 
 accept :: [Rule] -> Rule -> Word5 -> Bool
 accept rls r = case r of
-    Green  i ch -> isAt i ch
-    Yellow i ch -> \str -> not (isAt i ch str) && present ch str
-    Gray   i ch ->
-        if elsewhere ch rls
-        then not . isAt i ch
-        else not . present ch
+    Green  i c -> isAt i c
+    Yellow i c -> \str -> not (isAt i c str) && present c str
+    Gray   i c ->
+        if elsewhere c rls
+        then not . isAt i c
+        else not . present c
     where
-        elsewhere ch = any yellOrGreen . filter ((ch ==) . getC)
+        elsewhere c = any yellOrGreen . filter ((c ==) . getC)
         yellOrGreen r = case r of Yellow _ _ -> True
                                   Green  _ _ -> True
                                   _          -> False
