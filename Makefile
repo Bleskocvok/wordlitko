@@ -1,6 +1,8 @@
 
 HSFLAGS ?= -O2
 
+CXXFLAGS ?= -std=c++20 -Wall -Wextra -O3 -march=native
+
 APP_SRC = main.py
 EVAL_SRC = evaluation.py
 SOLVER_SRC = solver.hs
@@ -49,11 +51,17 @@ solve: $(SOLVER) $(CACHE)
 	export CHROME_DRIVER=$(CHROME_DRIVER); \
 	$(PYTHON) $(APP_SRC) "$(SOLVER)" "$(DATA)" | tee score
 
+csolve: solver.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
 run: solve score
 	python3 $(SEND_DC) score chan
 
 evaluate: $(SOLVER)
 	time -p $(PYTHON) $(EVAL_SRC) "$(ANSWERS)" "$(WORDS)" "$(SOLVER)"
+
+cevaluate: $(SOLVER)
+	time -p $(PYTHON) $(EVAL_SRC) "$(ANSWERS)" "$(WORDS)" "./csolve"
 
 $(CACHE): $(SOLVER)
 	$(SOLVER) '....' "$(WORDS)" > "$(CACHE)"
@@ -67,4 +75,4 @@ distclean: clean
 	$(RM) $(SOLVER)
 
 
-.PHONY: all clean distclean run solve evaluate time
+.PHONY: all clean distclean run solve evaluate cevaluate time

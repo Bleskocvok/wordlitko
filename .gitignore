@@ -24,6 +24,7 @@
 
 # ide
 /.vscode/
+*.swp
 
 # caches
 /__pycache__/
