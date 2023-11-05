@@ -70,6 +70,7 @@ struct clue_t
     color_t col;
     int i;
     char c;
+    bool elsewhere = false;
 
     friend std::ostream& operator<<( std::ostream& o, const clue_t& r )
     {
@@ -102,22 +103,13 @@ struct clue_t
 
 inline bool accepts( const std::vector< clue_t >& clues, const word_t& w )
 {
-    static bool yg_chars[ 256 ] = { 0 };
-    std::memset( yg_chars, 0, sizeof yg_chars );
-
-    for ( const auto& clue : clues )
-    {
-        if ( clue.col == color_t::GREEN || clue.col == color_t::YELLOW )
-            yg_chars[ static_cast< unsigned char >( clue.c ) ] = true;
-    }
-
     for ( const auto& clue : clues )
     {
         if ( !clue.consistent( w ) )
             return false;
 
         if ( clue.col == color_t::GRAY
-                && !yg_chars[ static_cast< unsigned char >( clue.c ) ]
+                && !clue.elsewhere
                 && w.has( clue.c ))
             return false;
     }
@@ -160,6 +152,8 @@ inline auto load_file( const std::string& filename ) -> std::vector< word_t >
 
 inline auto parse_clues( std::string_view str ) -> std::vector< clue_t >
 {
+    bool yg_chars[ 256 ] = { 0 };
+
     std::vector< clue_t > clues;
 
     auto low = []( unsigned char c ){ return std::tolower( c ); };
@@ -187,7 +181,13 @@ inline auto parse_clues( std::string_view str ) -> std::vector< clue_t >
         }
 
         clues.push_back({ .col = col, .i = i, .c = c });
+        if ( col == color_t::GREEN || col == color_t::YELLOW )
+            yg_chars[ static_cast< unsigned char >( c ) ] = true;
     }
+
+    for ( auto& clue : clues )
+        if ( clue.col == color_t::GRAY )
+            clue.elsewhere = yg_chars[ static_cast< unsigned char >( clue.c ) ];
 
     return clues;
 }
