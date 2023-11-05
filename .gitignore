@@ -1,9 +1,10 @@
 
 # binaries
-/solver
-/solver.o
-/solver.hi
+/hsolve
+/hsolve.o
+/hsolve.hi
 /*.exe
+/csolve
 
 # testing word databases
 /data/czech.txt
