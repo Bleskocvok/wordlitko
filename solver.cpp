@@ -224,20 +224,20 @@ inline long count_accepting( const std::vector< word_t >& words,
 
 
 inline float calculate_score( const word_t& guess,
-                              const std::vector< word_t >& words )
+                              const std::vector< word_t >& possible )
 {
-    if ( words.empty() )
+    if ( possible.empty() )
         return 1;
 
     auto scores = std::vector< long >{};
-    scores.reserve( words.size() );
+    scores.reserve( possible.size() );
 
     auto clues = std::vector< clue_t >{};
 
-    for ( const auto& chosen : words )
+    for ( const auto& chosen : possible )
     {
         clues = get_clues( guess, chosen );
-        scores.push_back( count_accepting( words, clues ) );
+        scores.push_back( count_accepting( possible, clues ) );
     }
 
     std::sort( scores.begin(), scores.end() );
@@ -250,13 +250,14 @@ inline float calculate_score( const word_t& guess,
 }
 
 
-inline void order_best( std::vector< word_t >& words )
+inline void order_best( std::vector< word_t >& words,
+                        std::vector< word_t >& chosen )
 {
     auto scores = std::vector< std::pair< float, word_t > >{};
     scores.reserve( words.size() );
 
     for ( const auto& w : words )
-        scores.emplace_back( calculate_score( w, words ), w );
+        scores.emplace_back( calculate_score( w, chosen ), w );
 
     std::sort( scores.begin(), scores.end() );
 
@@ -278,7 +279,16 @@ int main( int argc, char** argv )
 
     filter_accepting( database, clues );
 
-    order_best( database );
+    int each_nth = 1;
+    if ( database.size() > 50 )
+        each_nth = database.size() / 50;
+
+    auto chosen = decltype( database ){};
+
+    for ( std::size_t i = 0; i < database.size(); i += each_nth )
+        chosen.push_back( database[ i ] );
+
+    order_best( database, chosen );
 
     for ( auto w : database )
         std::cout << w << std::endl;

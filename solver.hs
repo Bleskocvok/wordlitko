@@ -9,8 +9,9 @@ import Control.Monad ( forM_, (<$!>) )
 import Data.Char ( isLetter, toLower )
 import Data.List ( group, sort, sortBy, sortOn )
 import System.Environment ( getArgs, getProgName )
-import Data.Foldable ( foldr' )
 import System.Exit
+import Data.Foldable ( foldr' )
+
 
 -- apparently not in `base`, therefore not portable necessarily
 import Data.Array as A ( Array, elems, (!), listArray )
@@ -60,7 +61,10 @@ solve input database = do
     words <- parseData <$!> getLines database
     let rules = parseRules input
         filtered = applyRules rules words
-        sorted = fromWord <$!> orderBest filtered
+        every = if len > 50 then len `div` 50 else 1
+            where len = length filtered
+        chosen = everyNth every filtered
+        sorted = fromWord <$!> orderBest chosen filtered
     forM_ sorted putStrLn
 
 
@@ -132,10 +136,15 @@ evaluate wrds a = mean
         mean = getMean $ simulate wrds a
 
 
-orderBest :: [Word5] -> [Word5]
-orderBest wrds = ((fst `map`) . sortOn snd) (zip wrds vals)
+everyNth _ [] = []
+everyNth n (x : xs) = x : everyNth n rest
+    where rest = drop (n - 1) xs
+
+
+orderBest :: [Word5] -> [Word5] -> [Word5]
+orderBest chosen wrds = ((fst `map`) . sortOn snd) (zip wrds vals)
     where
-        vals = evaluate wrds `map` wrds
+        vals = evaluate chosen `map` wrds
 
 
 -- format:
