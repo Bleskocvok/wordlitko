@@ -3,6 +3,8 @@
 /hsolve
 /hsolve.o
 /hsolve.hi
+/solver.o
+/solver.hi
 /*.exe
 /csolve
 
