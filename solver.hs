@@ -158,9 +158,10 @@ assignElsewhere clues = assign `map` clues
 
 
 applyClues :: [Clue] -> [Word5] -> [Word5]
-applyClues rls lst = foldr' (\r acc -> filter (accept rls r) acc) lst rls
+-- applyClues rls lst = foldr' (\r acc -> filter (accept rls r) acc) lst rls
 -- alternate implementation that feels like it should run faster, but doesn't
--- applyClues rls = filter (\w -> all (\r -> accept rls r w) rls)
+-- EDIT: actually maybe it kinda does
+applyClues rls = filter (\w -> all (\r -> accept rls r w) rls)
 
 
 accept :: [Clue] -> Clue -> Word5 -> Bool
