@@ -27,4 +27,5 @@ USER 1001
 
 RUN make
 
-ENTRYPOINT [ "bash", "update_run" ]
+ENTRYPOINT [ "make" ]
+CMD [ "run" ]

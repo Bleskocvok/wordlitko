@@ -8,7 +8,7 @@ import sys
 import os
 import datetime
 
-from rules import Board, all_correct, show
+from rules import Board, all_correct, show, word
 from runner import Runner
 from web import WebInteract
 
@@ -54,7 +54,7 @@ def autosolve(weber: WebInteract, runner: Runner) -> Board:
 
 def run() -> int:
     if len(sys.argv) < 3:
-        print(f'usage: {sys.argv[0]} SOLVER_PATH DATABASE_PATH',
+        print(f'usage: {sys.argv[0]} SOLVER_PATH DATABASE_PATH [-v]',
                 file=stderr)
         return 1
 
@@ -62,6 +62,7 @@ def run() -> int:
 
     SOLVER_PATH   = sys.argv[1]
     DATABASE_PATH = sys.argv[2]
+    SHOW_GUESSES  = len(sys.argv) > 3 and sys.argv[3] == '-v'
     URL           = "https://www.nytimes.com/games/wordle/index.html"
 
     DRIVER = os.getenv("DRIVER")
@@ -92,8 +93,12 @@ def run() -> int:
 
     print('\nBotle {}/6 (time {:.2f}s)\n'
             .format(len(tiles), end - start))
+
     for row in tiles:
-        show(row)
+        if SHOW_GUESSES:
+            print(f'{show(row)} || {word(row)} ||')
+        else:
+            print(f'{show(row)}')
 
     weber.quit()
 

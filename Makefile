@@ -14,6 +14,12 @@ ANSWERS = data/answers.txt
 WORDS = data/possible.txt
 DATA = $(WORDS)
 
+RUN_CMD = export DRIVER=$(DRIVER); \
+	export MOZ_HEADLESS=1; \
+	export FIREFOX_DRIVER=$(FIREFOX_DRIVER); \
+	export CHROME_DRIVER=$(CHROME_DRIVER); \
+	$(PYTHON) $(APP_SRC) "$(HSOLVER)" "$(DATA)"
+
 DRIVER ?= chrome
 
 ifeq ($(OS),Windows_NT)
@@ -53,13 +59,15 @@ ctime: $(HSOLVER)
 	time -p $(HSOLVER) '' "$(DATA)" | tail -n5
 
 solve: $(HSOLVER)
-	export DRIVER=$(DRIVER); \
-	export MOZ_HEADLESS=1; \
-	export FIREFOX_DRIVER=$(FIREFOX_DRIVER); \
-	export CHROME_DRIVER=$(CHROME_DRIVER); \
-	$(PYTHON) $(APP_SRC) "$(HSOLVER)" "$(DATA)" | tee score
+	$(RUN_CMD) | tee score
+
+solvev: $(HSOLVER)
+	$(RUN_CMD) -v | tee score
 
 run: solve score
+	python3 $(SEND_DC) score chan
+
+runv: solvev score
 	python3 $(SEND_DC) score chan
 
 evaluate: $(HSOLVER)

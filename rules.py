@@ -89,10 +89,18 @@ class Simulator:
         return res
 
 
-def show(result: List[Tile]) -> None:
-    for el in result:
-        print(el.clue.value, end='')
-    print()
+def show(tiles: List[Tile]) -> str:
+    res = ''
+    for el in tiles:
+        res += el.clue.value
+    return res
+
+
+def word(tiles: List[Tile]) -> str:
+    res = ''
+    for el in tiles:
+        res += el.char.upper()
+    return res
 
 
 def all_correct(result: List[Tile]) -> bool:
