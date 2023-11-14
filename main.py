@@ -96,7 +96,7 @@ def run() -> int:
 
     for row in tiles:
         if SHOW_GUESSES:
-            print(f'{show(row)} || {word(row)} ||')
+            print(f'{show(row)} ||{word(row)}||')
         else:
             print(f'{show(row)}')
 
