@@ -5,7 +5,7 @@ from sys import stderr
 from typing import List, Optional, Tuple
 import sys
 
-from rules import Simulator, Tile, Board, all_correct, show
+from rules import Simulator, Tile, Board, all_correct, show, print_term_tile
 from runner import Runner
 
 
@@ -103,7 +103,8 @@ def main() -> int:
             print('\033[K', end='')
             if row < len(tiles):
                 for elem in tiles[row]:
-                    print(f'{elem.clue.value}', end='')
+                    print_term_tile(elem)
+#                     print(f'{elem.clue.value}', end='')
             print(' ')
 
         print(f'ROUND: {i + 1} / {len(answers)}')

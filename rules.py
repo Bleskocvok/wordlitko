@@ -27,6 +27,19 @@ Board = List[List[Tile]]
 WORD_LENGTH: int = 5
 
 
+def clue_bg(clue: Clue) -> str:
+    if clue == Clue.GRAY:   return "\033[100m"
+    if clue == Clue.YELLOW: return "\033[43m"
+    if clue == Clue.GREEN:  return "\033[42m"
+
+
+def print_term_tile(tile: Tile):
+    print(end='\033[30;1m')
+    print(end=clue_bg(tile.clue))
+    print(end=f' {tile.char.upper()} ')
+    print(end='\033[0m')
+
+
 class Simulator:
 
     def __init__(self, allowed: List[str], word: Optional[str] = None):
