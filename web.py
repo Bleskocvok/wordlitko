@@ -52,6 +52,11 @@ class WebInteract:
 
         time.sleep(2)
 
+        # accept cookies and trackers
+        self.driver \
+                .find_element(By.XPATH, '//*[@id="pz-gdpr-btn-accept"]') \
+                .click()
+
         self.driver  \
                 .find_element(By.XPATH,
                         '/html/body/div/div/div/div/div/div[2]/button[2]') \
