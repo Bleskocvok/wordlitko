@@ -83,10 +83,7 @@ def run() -> int:
 
 #     print(weber.get_title())
 
-    try:
-        weber.close_overlays()
-    except Exception as e:
-            print(f'Warning: {e}', file=stderr)
+    weber.close_overlays()
 
     tiles = autosolve(weber, runner)
 

@@ -53,10 +53,14 @@ class WebInteract:
 
         time.sleep(2)
 
-        # accept cookies and trackers
-        self.driver \
-                .find_element(By.XPATH, '//*[@id="pz-gdpr-btn-accept"]') \
-                .click()
+        # this seems to disappear after the first container clicks it
+        try:
+            # accept cookies and trackers
+            self.driver \
+                    .find_element(By.XPATH, '//*[@id="pz-gdpr-btn-accept"]') \
+                    .click()
+        except Exception as e:
+            print(f'Warning: {e}', file=stderr)
 
         self.driver  \
                 .find_element(By.XPATH,
