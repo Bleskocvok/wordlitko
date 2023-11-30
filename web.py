@@ -26,6 +26,7 @@ class WebInteract:
             options = ChromeOptions()
             options.add_argument("--headless");
             options.add_argument("--disable-gpu");
+            options.add_argument('--no-sandbox')
             options.headless = True
             self.driver = webdriver.Chrome(service=service, options=options)
         elif which == WebInteract.FIREFOX:
