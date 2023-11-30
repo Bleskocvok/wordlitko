@@ -62,11 +62,15 @@ class Runner:
         nxt = lambda: decode(solver.stdout.readline())
 
         word = nxt()
+        prev = None
         while word in banned:
+            if word == prev:
+                raise RuntimeError("loop")
             if solver.stdout:
                 word = nxt()
             else:
                 word = ''
+            prev = word
         solver.kill()
 
         if len(word) != 5:

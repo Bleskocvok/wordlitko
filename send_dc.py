@@ -20,6 +20,12 @@ def send_to(dc_id, msg, token, fetcher):
             print(f"user {dc_id} not found", file=sys.stderr)
         await client.close()
 
+    @client.event
+    async def on_error(ev, *args, **kwargs):
+        ex = sys.exc_info()
+        print(f"error: {ev}: {ex}", file=sys.stderr)
+        sys.exit(1)
+
     client.run(token)
 
 
