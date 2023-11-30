@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 
 
 from typing import List, Optional
+from sys import stderr
 import time
 
 from rules import Clue, Tile, WORD_LENGTH
@@ -65,7 +66,8 @@ class WebInteract:
         self.driver.implicitly_wait(1.5)
 
         self.driver  \
-                .find_element(By.XPATH, '/html/body/div/div/dialog/div/button')  \
+                .find_element(By.XPATH,
+                        '/html/body/div/div/dialog/div/button')  \
                 .click()
 
         self.driver.implicitly_wait(0.5)
