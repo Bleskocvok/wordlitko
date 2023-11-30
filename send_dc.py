@@ -2,6 +2,7 @@ import discord
 from dotenv import load_dotenv
 import sys
 import os
+from signal import alarm
 
 
 def send_to(dc_id, msg, token, fetcher):
@@ -12,7 +13,6 @@ def send_to(dc_id, msg, token, fetcher):
 
     @client.event
     async def on_ready():
-#         user = await client.fetch_user(dc_id)
         user = await fetcher(client, dc_id)
         if user:
             await user.send(msg)
@@ -24,7 +24,6 @@ def send_to(dc_id, msg, token, fetcher):
     async def on_error(ev, *args, **kwargs):
         ex = sys.exc_info()
         print(f"error: {ev}: {ex}", file=sys.stderr)
-        sys.exit(1)
 
     client.run(token)
 
@@ -33,6 +32,9 @@ def main(argv) -> int:
     if len(argv) < 2:
         print(f"usage: {argv[0]} file [user/chan]", file=sys.stderr)
         return 1
+
+    # kill the process if it gets stuck for 5s
+    alarm(5)
 
     filename = argv[1]
     where = "user" if len(argv) < 3 else argv[2]
