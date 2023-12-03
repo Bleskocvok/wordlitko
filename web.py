@@ -1,4 +1,3 @@
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -54,28 +53,23 @@ class WebInteract:
 
         time.sleep(2)
 
-        # this seems to disappear after the first container clicks it
-        try:
-            # accept cookies and trackers
-            self.driver \
-                    .find_element(By.XPATH, '//*[@id="pz-gdpr-btn-accept"]') \
-                    .click()
-        except Exception as e:
-            print(f'Warning: {e}', file=stderr)
+        # first one seems to disappear after the first container clicks it
 
-        self.driver  \
-                .find_element(By.XPATH,
-                        '/html/body/div/div/div/div/div/div[2]/button[2]') \
-                .click()
+        # accept cookies and trackers
+        # idk
+        # idk
+        overlays = [
+            '//*[@id="pz-gdpr-btn-accept"]',
+            '/html/body/div/div/div/div/div/div[2]/button[2]',
+            '/html/body/div/div/dialog/div/button'
+        ]
 
-        self.driver.implicitly_wait(1.5)
-
-        self.driver  \
-                .find_element(By.XPATH,
-                        '/html/body/div/div/dialog/div/button')  \
-                .click()
-
-        self.driver.implicitly_wait(0.5)
+        for xpath in overlays:
+            self.driver.implicitly_wait(0.5)
+            try:
+                self.driver .find_element(By.XPATH, xpath).click()
+            except Exception as e:
+                print(f'Warning: {e}', file=stderr)
 
         # close help overlay
         self.body.click()
