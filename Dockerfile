@@ -2,8 +2,6 @@ FROM ubuntu
 
 WORKDIR /app
 
-COPY --chown=1001 . .
-
 RUN apt update \
     && apt install -y \
     git \
@@ -13,6 +11,8 @@ RUN apt update \
     python3.10 \
     python3-pip \
     ghc
+
+COPY --chown=1001 . .
 
 RUN pip install -r ./requirements.txt
 
