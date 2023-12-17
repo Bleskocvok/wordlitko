@@ -33,37 +33,42 @@ def send_to(dc_id, msg, token, fetcher):
 
 def main(argv) -> int:
     if len(argv) < 2:
-        print(f"usage: {argv[0]} file [user/chan]", file=sys.stderr)
-        return 1
+        raise RuntimeError(f"usage: {argv[0]} <user | chan> id [file]")
+
+    where = argv[1]
+    dc_id = argv[2]
+
+    load_dotenv()
+    token = os.getenv('DISCORD_TOKEN')
+
+    if not token:
+        raise RuntimeError("environment variable DISCORD_TOKEN not set")
+
+    input_data = ""
+
+    if len(argv) >= 4:
+        with open(argv[3], 'r') as f:
+            input_data = f.read()
+    else:
+        input_data = sys.stdin.read()
 
     # kill the process if it gets stuck for 5s
     alarm(5)
 
-    filename = argv[1]
-    where = "user" if len(argv) < 3 else argv[2]
-
-    load_dotenv()
-    token = os.getenv('DISCORD_TOKEN')
-    dc_id = os.getenv('DISCORD_ID')
-
-    if not token:
-        print("env. var DISCORD_TOKEN not set", file=sys.stderr)
-        return 1
-
-    if not dc_id:
-        print("env. var DISCORD_ID not set", file=sys.stderr)
-        return 1
-
-    with open(filename, 'r') as f:
-        if where == "user":
-            send_to(dc_id, f.read(), token, lambda cl, i: cl.fetch_user(i))
-        elif where == "chan":
-            send_to(dc_id, f.read(), token, lambda cl, i: cl.fetch_channel(i))
-        else:
-            raise RuntimeError(f"invalid where '{where}', must be user/chan")
+    if where == "user":
+        send_to(dc_id, input_data, token, lambda cl, i: cl.fetch_user(i))
+    elif where == "chan":
+        send_to(dc_id, input_data, token, lambda cl, i: cl.fetch_channel(i))
+    else:
+        raise RuntimeError(f"invalid where '{where}', must be user/chan")
 
     return 0
 
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    try:
+        sys.exit(main(sys.argv))
+    except Exception as ex:
+        print(f"error: {ex}", file=sys.stderr)
+        sys.exit(1)
+

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+url="$1"
+target="$2"
+id="$DISCORD_ID"
+verbose="$VERBOSE"
+
+[ "$target"  = "" ] && target="chan"
+[ "$verbose" = "" ] || verbose="v"
+
+python3 ./fake.py "$url" "./csolve" "data/possible.txt" "$verbose" | python3 ./send_dc.py "$target" "$id"

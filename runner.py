@@ -64,12 +64,12 @@ class Runner:
         word = nxt()
         prev = None
         while word in banned:
-            if word == prev:
-                raise RuntimeError("loop")
             if solver.stdout:
                 word = nxt()
             else:
                 word = ''
+            if word == prev:
+                raise RuntimeError("loop")
             prev = word
         solver.kill()
 
