@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import discord
 from dotenv import load_dotenv
 import sys
@@ -24,6 +26,7 @@ def send_to(dc_id, msg, token, fetcher):
     async def on_error(ev, *args, **kwargs):
         ex = sys.exc_info()
         print(f"error: {ev}: {ex}", file=sys.stderr)
+        await client.close()
 
     client.run(token)
 
