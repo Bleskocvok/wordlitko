@@ -1,9 +1,9 @@
 #!/bin/bash
 
-url="$1"
+verbose="$1"
 target="$2"
+url="$URL"
 id="$DISCORD_ID"
-verbose="$VERBOSE"
 
 [ "$target"  = "" ] && target="chan"
 [ "$verbose" = "" ] || verbose="v"
