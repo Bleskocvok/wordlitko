@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 from sys import stderr
-from bs4 import BeautifulSoup
-import bs4
 import http.client
 import sys
 import time
@@ -24,22 +22,17 @@ def make_request(root: str, path: str) -> str:
     return res
 
 
-def run(root: str, solver: str, words_path: str,
+def run(url: str, solver: str, words_path: str,
         show_guesses: bool = False) -> int:
     try:
-        content = make_request(root, "/")
+        delim = url.find("/")
+        root = url[:delim]
+        path = url[delim:]
+        content = make_request(root, path)
     except Exception as ex:
         raise RuntimeError("request", ex)
 
-    reader = BeautifulSoup(content, "html.parser")
-
-    css_path = "html body div div h1 span"
-    tag = reader.select(css_path)
-
-    if not tag:
-        raise RuntimeError("tag not found")
-
-    word = tag[0].text
+    word = content.decode("utf-8")
 
     if len(word) != 5:
         raise RuntimeError(f"word not five characters '{word}'")
